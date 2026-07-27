@@ -80,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const portions = listing.remainingPortion;
         const isLow = portions <= 3 && portions > 0;
 
-        // Fix image URL — prefix with API base if relative path
 let imageUrl = listing.primaryImageUrl;
 if (imageUrl && imageUrl.startsWith('/')) {
     imageUrl = `https://localhost:7208${imageUrl}`;

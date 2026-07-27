@@ -7,7 +7,6 @@ async function apiFetch(endpoint, options = {}) {
         ...options.headers
     };
 
-    // For FormData (file uploads), remove Content-Type and let browser set it
     if (options.body instanceof FormData) {
         delete headers['Content-Type'];
     }
@@ -50,6 +49,7 @@ const ListingAPI = {
     getAll: (isFree) => apiFetch(`/listing${isFree !== undefined ? `?isFree=${isFree}` : ''}`),
     getDetails: (id) => apiFetch(`/listing/${id}`),
     create: (formData) => apiFetch('/listing', { method: 'POST', body: formData }),
+    getVendorListings: () => apiFetch('/listing/vendor-listings'),
 };
 
 // Orders

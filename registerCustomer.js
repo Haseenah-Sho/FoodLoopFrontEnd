@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('togglePassword', 'passwordInput', 'toggleIcon');
     setupToggle('toggleConfirm', 'confirmPasswordInput', 'toggleConfirmIcon');
 
-    // Clear errors on input
+    
     ['fullNameInput','usernameInput','phoneInput','emailInput','addressInput','passwordInput','confirmPasswordInput']
         .forEach(id => {
             document.getElementById(id)?.addEventListener('input', () => {

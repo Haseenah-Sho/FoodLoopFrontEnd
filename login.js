@@ -74,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Auth.setUser(result.data);
 
 if (result.data.roles.includes('app_vendor')) {
-    // Fetch vendor profile to get vendorId and store it
     const profileResult = await VendorAPI.getProfile();
     if (profileResult.isSuccessful) {
         localStorage.setItem('fl_vendor_id', profileResult.data.vendorId);
