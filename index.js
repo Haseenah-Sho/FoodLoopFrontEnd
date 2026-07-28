@@ -92,8 +92,8 @@ const imgHtml = imageUrl
     : `<div class="listing-card-img-placeholder"><i class="bi bi-image"></i></div>`;
 
         const fulfillmentTags = [
-            listing.pickUpAvailable ? '<span class="fulfillment-tag"><i class="bi bi-bag"></i> Pickup</span>' : '',
-            listing.deliveryAvailable ? '<span class="fulfillment-tag"><i class="bi bi-bicycle"></i> Delivery</span>' : ''
+            listing.pickUpAvailable ? '<span class="fulfillment-tag"> Pickup</span>' : '',
+            listing.deliveryAvailable ? '<span class="fulfillment-tag"> Delivery</span>' : ''
         ].filter(Boolean).join('');
 
         return `
@@ -107,7 +107,7 @@ const imgHtml = imageUrl
                         </span>
                     </div>
                     <div class="listing-card-vendor">
-                        <i class="bi bi-shop"></i> ${listing.vendorName}
+                        ${listing.vendorName}
                     </div>
                     <div class="listing-card-fulfillment">
                         ${fulfillmentTags}
@@ -115,7 +115,7 @@ const imgHtml = imageUrl
                     <div class="listing-card-footer">
                         <div class="listing-card-price ${isFree ? 'free' : ''}">${price}</div>
                         <div class="listing-card-portions ${isLow ? 'low' : ''}">
-                            <i class="bi bi-${isLow ? 'exclamation-circle' : 'layers'}"></i>
+                           
                             ${portions} left
                         </div>
                     </div>
@@ -139,26 +139,12 @@ const imgHtml = imageUrl
         });
     });
 
-    // ── Skeleton loader ──
-    function showSkeletons() {
-        const grid = document.getElementById('listings-grid');
-        grid.innerHTML = Array(8).fill(`
-            <div class="skeleton-card">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                    <div class="skeleton-line medium"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line medium"></div>
-                </div>
-            </div>
-        `).join('');
-    }
 
     function showEmpty(message) {
         const grid = document.getElementById('listings-grid');
         grid.innerHTML = `
             <div class="empty-state">
-                <i class="bi bi-basket2"></i>
+                
                 <p>${message}</p>
             </div>
         `;

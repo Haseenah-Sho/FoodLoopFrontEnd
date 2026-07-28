@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!result.isSuccessful) {
         document.getElementById('recent-listings').innerHTML =
-            `<div class="empty-state"><i class="bi bi-bag-x"></i><p>No listings available.</p></div>`;
+            `<div class="empty-state"><p>No listings available.</p></div>`;
         document.getElementById('stat-listings').textContent = '0';
         return;
     }
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (recent.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
-                <i class="bi bi-bag"></i>
+                
                 <p>${vendor?.isApproved === false
                     ? 'Your account needs admin approval before you can create listings.'
                     : 'No listings yet. <a href="create-listing.html">Create your first listing</a>.'
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('recent-orders').innerHTML =
-                `<div class="empty-state"><i class="bi bi-receipt"></i><p>Could not load orders.</p></div>`;
+                `<div class="empty-state"><p>Could not load orders.</p></div>`;
             document.getElementById('stat-orders').textContent = '0';
             return;
         }
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (recent.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="bi bi-receipt"></i>
+                    
                     <p>No orders received yet.</p>
                 </div>`;
             return;

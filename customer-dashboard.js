@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('recent-orders').innerHTML =
-                `<div class="empty-state"><i class="bi bi-bag-x"></i><p>Could not load orders.</p></div>`;
+                `<div class="empty-state"><p>Could not load orders.</p></div>`;
             return;
         }
 

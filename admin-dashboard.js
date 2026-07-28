@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('recent-listings').innerHTML =
-                `<div class="empty-state"><i class="bi bi-bag"></i><p>Could not load listings.</p></div>`;
+                `<div class="empty-state"><p>Could not load listings.</p></div>`;
             document.getElementById('stat-listings').textContent = '0';
             return;
         }
@@ -141,7 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (recent.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="bi bi-bag"></i>
                     <p>No listings on the platform yet.</p>
                 </div>`;
             return;
