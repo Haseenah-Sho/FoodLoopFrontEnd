@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customers - FoodLoop Admin</title>
+    <title>Notifications - FoodLoop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -19,17 +19,18 @@
                 </button>
             </div>
             <div class="sidebar-user">
-                <div class="sidebar-avatar" id="sidebar-avatar"></div>
+                
                 <div class="sidebar-user-info">
                     <div class="sidebar-username" id="sidebar-username">Loading...</div>
-                    <div class="sidebar-role">Admin</div>
+                    <div class="sidebar-role">Customer</div>
                 </div>
             </div>
             <nav class="sidebar-nav">
-                <a href="admin-dashboard.html" class="sidebar-link">Dashboard</a>
-                <a href="admin-vendors.html" class="sidebar-link">Vendors</a>
-                <a href="admin-customers.html" class="sidebar-link active">Customers</a>
-                <a href="admin-listings.html" class="sidebar-link">Listings</a>
+                <a href="customer-dashboard.html" class="sidebar-link">Dashboard</a>
+                <a href="index.html" class="sidebar-link">Browse Food</a>
+                <a href="my-orders.html" class="sidebar-link">My Orders</a>
+                <a href="my-payments.html" class="sidebar-link">My Payments</a>
+                <a href="notifications.html" class="sidebar-link active">Notifications</a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
@@ -43,12 +44,17 @@
                 <button class="topbar-toggle" id="sidebarToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="topbar-title">Customers</div>
+                <div class="topbar-title">Notifications</div>
+                <div class="topbar-right">
+                    <button class="btn-primary-sm" id="mark-all-btn" style="display:none;">
+                        <i class="bi bi-check-all"></i> Mark All As Read
+                    </button>
+                </div>
             </header>
 
             <main class="dashboard-content">
                 <div class="section">
-                    <div id="customers-container">
+                    <div id="notifications-container">
                         
                     </div>
                 </div>
@@ -58,6 +64,6 @@
 
     <script src="utils.js"></script>
     <script src="api.js"></script>
-    <script src="admin-customers.js"></script>
+    <script src="notifications.js"></script>
 </body>
 </html>

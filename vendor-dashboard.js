@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const name = user.name || 'Vendor';
     const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
-    document.getElementById('sidebar-avatar').textContent = initials;
+    
     document.getElementById('sidebar-username').textContent = name;
     document.getElementById('topbar-greeting').textContent = `Hi, ${name.split(' ')[0]}`;
 
