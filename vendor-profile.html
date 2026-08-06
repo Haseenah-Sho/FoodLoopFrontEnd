@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - FoodLoop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="sidebar-logo">Food<span>Loop</span></a>
+                <button class="sidebar-close" id="sidebarClose">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-username" id="sidebar-username">Loading...</div>
+                    <div class="sidebar-role">Vendor / Household</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="vendor-dashboard.html" class="sidebar-link">Dashboard</a>
+                <a href="my-listings.html" class="sidebar-link">My Listings</a>
+                <a href="create-listing.html" class="sidebar-link">Create Listing</a>
+                <a href="vendor-orders.html" class="sidebar-link">Orders</a>
+                <a href="vendor-transactions.html" class="sidebar-link">Transactions</a>
+                <a href="vendor-profile.html" class="sidebar-link active">Profile</a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="dashboard-main">
+            <header class="topbar">
+                <button class="topbar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-title">Profile</div>
+            </header>
+
+            <main class="dashboard-content">
+
+                <!-- Profile view card -->
+                <div class="form-card" id="profile-view">
+                    <div class="table-loading" id="profile-loading">
+                    </div>
+
+                    <div id="profile-details" style="display:none;">
+
+                        <!-- Approval status -->
+                        <div id="approval-status" style="margin-bottom:20px;"></div>
+
+                        <div class="form-section-title">Vendor / Household Information</div>
+
+                        <div class="profile-info-grid">
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Full Name</span>
+                                <span class="profile-info-value" id="view-fullname"></span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Organization / Household</span>
+                                <span class="profile-info-value" id="view-orgname"></span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Email Address</span>
+                                <span class="profile-info-value" id="view-email"></span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Phone Number</span>
+                                <span class="profile-info-value" id="view-phone"></span>
+                            </div>
+                            <div class="profile-info-item">
+                                <span class="profile-info-label">Approval Status</span>
+                                <span class="profile-info-value" id="view-status"></span>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary-sm" id="edit-btn" style="margin-top:20px;">
+                            <i class="bi bi-pencil"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Edit form card - hidden by default -->
+                <div class="form-card" id="profile-edit" style="display:none;margin-top:20px;">
+
+                    <div class="form-section-title">Update Information</div>
+
+                    <div class="form-error-banner" id="form-error" style="display:none;"></div>
+                    <div class="form-success-banner" id="form-success" style="display:none;"></div>
+
+                    <form id="profile-form" novalidate>
+
+                        <div class="dash-form-group">
+                            <label for="orgName">Organization / Household Name</label>
+                            <input type="text" id="orgName" class="dash-input">
+                            <div class="dash-field-error" id="orgName-error"></div>
+                            <p class="dash-hint">
+                                <i class="bi bi-info-circle"></i>
+                                Changing your organization name will require re-approval from admin.
+                            </p>
+                        </div>
+
+                        <div class="dash-form-group">
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" id="phoneNumber" class="dash-input">
+                            <div class="dash-field-error" id="phoneNumber-error"></div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-top:8px;">
+                            <button type="submit" class="btn-submit-listing" id="save-btn" style="flex:1;">
+                                <span id="btn-text">Save Changes</span>
+                                <span class="spinner" id="btn-spinner"></span>
+                            </button>
+                            <button type="button" id="cancel-btn"
+                                style="flex:1;height:46px;background:transparent;border:1.5px solid var(--border);
+                                border-radius:8px;font-size:0.875rem;font-weight:600;font-family:'Inter',sans-serif;
+                                cursor:pointer;color:var(--dark-muted);transition:all 0.2s;">
+                                Cancel
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="vendor-profile.js"></script>
+</body>
+</html>

@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <tr>
                         <td class="food-name">${l.foodName}</td>
                         <td>${l.isFree ? 'Free' : formatCurrency(l.price)}</td>
-                        <td>${l.remainingPortion} left</td>
+                        <td>${l.remainingPortion}</td>
                         <td>${listingStatusPill(l.status)}</td>
                     </tr>
                 `).join('')}

@@ -62,6 +62,7 @@ const OrderAPI = {
     dispatchDelivery: (orderNo) => apiFetch(`/order/dispatch-order/${orderNo}`, { method: 'PUT' }),
     markDelivered: (orderNo) => apiFetch(`/order/mark-delivered/${orderNo}`, { method: 'PUT' }),
     getMyVendorOrders: () => apiFetch('/order/vendor-orders'),
+    cancelOrder: (orderId) => apiFetch(`/order/${orderId}`, { method: 'DELETE' }),
 };
 
 // Payments
