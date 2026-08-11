@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!requireAuth(['app_vendor'])) return;
 
     const user = Auth.getUser();
-    const name = user.name || 'Vendor';
+    const name = user.name || 'Food Provider';
     const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
     
@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const vendorApproved = user.vendorApproved;
     if (vendorApproved === false) {
         document.getElementById('approval-banner').style.display = 'flex';
-        document.getElementById('create-listing-btn').style.pointerEvents = 'none';
-        document.getElementById('create-listing-btn').style.opacity = '0.5';
+        document.getElementById('post-food-items-btn').style.pointerEvents = 'none';
+        document.getElementById('post-food-items-btn').style.opacity = '0.5';
     }
 
     // Load data
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!result.isSuccessful) {
         document.getElementById('recent-listings').innerHTML =
-            `<div class="empty-state"><p>No listings available.</p></div>`;
+            `<div class="empty-state"><p>No food items available.</p></div>`;
         document.getElementById('stat-listings').textContent = '0';
         return;
     }
@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="empty-state">
                 
                 <p>${vendor?.isApproved === false
-                    ? 'Your account needs admin approval before you can create listings.'
-                    : 'No listings yet. <a href="create-listing.html">Create your first listing</a>.'
+                    ? 'Your account needs admin approval before you can post food items.'
+                    : 'No food items yet. <a href="post-food-items.html">Post your first food item</a>.'
                 }</p>
             </div>`;
         return;

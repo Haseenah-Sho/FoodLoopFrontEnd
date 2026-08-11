@@ -1,5 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // ── Auth-aware nav ──
+    setupAuthNav();
+
+    function setupAuthNav() {
+        if (Auth.isLoggedIn()) {
+            document.getElementById('nav-guest-actions').style.display = 'none';
+            document.getElementById('nav-user-actions').style.display = 'flex';
+
+            const roles = Auth.getUser().roles || [];
+            const dashboardLink = document.getElementById('nav-dashboard-link');
+            if (roles.includes('app_admin')) {
+                dashboardLink.href = 'admin-dashboard.html';
+            } else if (roles.includes('app_vendor')) {
+                dashboardLink.href = 'food-providers-dashboard.html';
+            } else {
+                dashboardLink.href = 'customer-dashboard.html';
+            }
+        }
+    }
+
     // ── Mobile nav toggle ──
     const navToggle = document.getElementById('navToggle');
     const navMenu = document.getElementById('navMenu');
@@ -35,6 +55,93 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ── Cart drawer ──
+    initCartDrawer();
+    renderCartDrawer();
+
+    function initCartDrawer() {
+        const drawer = document.getElementById('cartDrawer');
+        const overlay = document.getElementById('cartOverlay');
+
+        const open = () => { drawer.classList.add('open'); overlay.classList.add('open'); };
+        const close = () => { drawer.classList.remove('open'); overlay.classList.remove('open'); };
+
+        document.getElementById('cartToggleBtn').addEventListener('click', open);
+        document.getElementById('cartCloseBtn').addEventListener('click', close);
+        overlay.addEventListener('click', close);
+    }
+
+    function renderCartDrawer() {
+        const cart = Cart.get();
+        const body = document.getElementById('cartBody');
+        const foot = document.getElementById('cartFoot');
+
+        if (!cart || cart.items.length === 0) {
+            body.innerHTML = `
+                <div class="empty-state" id="cartEmptyState">
+                    <i class="bi bi-cart-x"></i>
+                    <p>Your cart is empty.</p>
+                    <span class="cart-empty-hint">Add food items to get started.</span>
+                </div>`;
+            foot.style.display = 'none';
+            return;
+        }
+
+        foot.style.display = 'block';
+        document.getElementById('cartVendorNote').innerHTML =
+            `<i class="bi bi-shop"></i> Items from ${cart.vendorName}`;
+
+        body.innerHTML = cart.items.map(item => {
+            const lineTotal = item.isFree ? 0 : (item.price || 0) * item.quantity;
+            const imgUrl = item.imageUrl
+                ? (item.imageUrl.startsWith('/') ? `https://localhost:7208${item.imageUrl}` : item.imageUrl)
+                : null;
+
+            return `
+                <div class="cart-drawer-line" data-id="${item.listingId}">
+                    ${imgUrl
+                        ? `<img src="${imgUrl}" class="cart-drawer-thumb" alt="${item.foodName}" onerror="this.outerHTML='<div class=\\'cart-drawer-thumb-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`
+                        : `<div class="cart-drawer-thumb-placeholder"><i class="bi bi-image"></i></div>`}
+                    <div class="cart-drawer-info">
+                        <div class="cart-drawer-name">${item.foodName}</div>
+                        <div class="cart-drawer-price">${item.isFree ? 'Free' : formatCurrency(item.price) + ' each'}</div>
+                        <div class="cart-drawer-controls">
+                            <div class="cart-drawer-qty">
+                                <button class="qty-dec" data-id="${item.listingId}" ${item.quantity <= 1 ? 'disabled' : ''}>−</button>
+                                <span>${item.quantity}</span>
+                                <button class="qty-inc" data-id="${item.listingId}" ${item.quantity >= item.maxQty ? 'disabled' : ''}>+</button>
+                            </div>
+                            <button class="cart-drawer-remove" data-id="${item.listingId}"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        const total = cart.items.reduce((sum, i) => sum + (i.isFree ? 0 : (i.price || 0) * i.quantity), 0);
+        document.getElementById('cartTotal').textContent = total > 0 ? formatCurrency(total) : 'Free';
+
+        body.querySelectorAll('.qty-inc').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = cart.items.find(i => i.listingId === btn.dataset.id);
+                if (item) Cart.updateQuantity(item.listingId, item.quantity + 1);
+                renderCartDrawer();
+            });
+        });
+        body.querySelectorAll('.qty-dec').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = cart.items.find(i => i.listingId === btn.dataset.id);
+                if (item) Cart.updateQuantity(item.listingId, item.quantity - 1);
+                renderCartDrawer();
+            });
+        });
+        body.querySelectorAll('.cart-drawer-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                Cart.remove(btn.dataset.id);
+                renderCartDrawer();
+            });
+        });
+    }
+
     // ── Listings ──
     let allListings = [];
     let activeFilter = 'all';
@@ -43,20 +150,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadListings() {
 
-        showSkeletons();
 
         try {
             const result = await ListingAPI.getAll();
 
-console.log("API result:", result);
-console.log("FIRST LISTING:", JSON.stringify(result.data[0], null, 2));
-
-            // DEBUGGING
-            console.log("API result:", result);
-            console.log("Listings returned:", result.data);
-
             if (!result.isSuccessful || !result.data) {
-                showEmpty('Unable to load listings right now.');
+                showEmpty('Unable to load food items right now.');
                 return;
             }
 
@@ -73,7 +172,7 @@ console.log("FIRST LISTING:", JSON.stringify(result.data[0], null, 2));
 
         } catch (error) {
             console.error("Error loading listings:", error);
-            showEmpty('Unable to load listings right now.');
+            showEmpty('Unable to load food items right now.');
         }
     }
 
@@ -85,7 +184,7 @@ console.log("FIRST LISTING:", JSON.stringify(result.data[0], null, 2));
 
         grid.innerHTML = `
             <div class="empty-state">
-                <p>Loading listings...</p>
+                <p>Loading food items...</p>
             </div>
         `;
     }
@@ -97,10 +196,10 @@ console.log("FIRST LISTING:", JSON.stringify(result.data[0], null, 2));
 
         if (!grid) return;
 
-        const toShow = listings.slice(0, 8);
+        const toShow = listings;
 
         if (toShow.length === 0) {
-            showEmpty('No listings available right now. Check back soon!');
+            showEmpty('No food items available right now. Check back soon!');
             return;
         }
 
@@ -115,12 +214,12 @@ console.log("FIRST LISTING:", JSON.stringify(result.data[0], null, 2));
 
             if (card && card.dataset.id) {
                 window.location.href =
-                    `listing-detail.html?id=${card.dataset.id}`;
+                    `food-items-detail.html?id=${card.dataset.id}`;
             }
         };
     }
 
-    // ── Create listing card ──
+    // ── Post Food Items card ──
     function createListingCard(listing) {
 
         const isFree = listing.isFree;

@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    if (!requireAuth(['app_vendor'])) return;
+    if (!requireAuth(['app_customer'])) return;
 
     const user = Auth.getUser();
-    const name = user.name || 'Vendor';
+    const name = user.name || 'Customer';
     document.getElementById('sidebar-username').textContent = name;
 
     setupSidebar();
@@ -16,10 +16,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('edit-btn').addEventListener('click', () => {
         document.getElementById('profile-edit').style.display = 'block';
         document.getElementById('edit-btn').style.display = 'none';
-        // Pre-fill edit form with current values
-        document.getElementById('orgName').value = currentProfile.organizationName;
         document.getElementById('phoneNumber').value = currentProfile.phoneNumber;
-        // Scroll to edit form
+        document.getElementById('address').value = currentProfile.address;
         document.getElementById('profile-edit').scrollIntoView({ behavior: 'smooth' });
     });
 
@@ -30,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function loadProfile() {
-        const result = await VendorAPI.getProfile();
+        const result = await CustomerAPI.getProfile();
 
         document.getElementById('profile-loading').style.display = 'none';
 
@@ -43,32 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentProfile = result.data;
 
-        // Populate view
-        document.getElementById('view-fullname').textContent = user.name || '—';
-        document.getElementById('view-orgname').textContent = currentProfile.organizationName;
+        document.getElementById('view-fullname').textContent = currentProfile.name || '—';
         document.getElementById('view-email').textContent = currentProfile.email;
-        document.getElementById('view-phone').textContent = currentProfile.phoneNumber;
-        document.getElementById('view-status').innerHTML = currentProfile.isApproved
-            ? `<span class="status-pill status-confirmed">Approved</span>`
-            : `<span class="status-pill status-pending">Pending Approval</span>`;
-
-        // Approval banner
-        const statusEl = document.getElementById('approval-status');
-        if (currentProfile.isApproved) {
-            statusEl.innerHTML = `
-                <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:12px 16px;
-                    display:flex;align-items:center;gap:10px;font-size:0.85rem;color:#2e7d32;">
-                    <i class="bi bi-patch-check-fill"></i>
-                    <strong>Account Approved</strong> - You can create and manage listings.
-                </div>`;
-        } else {
-            statusEl.innerHTML = `
-                <div style="background:#fff3e0;border:1px solid #ffe0b2;border-radius:8px;padding:12px 16px;
-                    display:flex;align-items:center;gap:10px;font-size:0.85rem;color:#e65100;">
-                    <i class="bi bi-hourglass-split"></i>
-                    <strong>Pending Approval</strong> - Your account is awaiting admin's approval.
-                </div>`;
-        }
+        document.getElementById('view-phone').textContent = currentProfile.phoneNumber || '—';
+        document.getElementById('view-address').textContent = currentProfile.address || '—';
 
         document.getElementById('profile-details').style.display = 'block';
     }
@@ -77,18 +53,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const orgName = document.getElementById('orgName').value.trim();
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
+        const address = document.getElementById('address').value.trim();
 
         let hasError = false;
-        if (!orgName) {
-            document.getElementById('orgName-error').textContent = 'Organization name is required.';
-            document.getElementById('orgName').classList.add('is-invalid');
-            hasError = true;
-        }
         if (!phoneNumber) {
             document.getElementById('phoneNumber-error').textContent = 'Phone number is required.';
             document.getElementById('phoneNumber').classList.add('is-invalid');
+            hasError = true;
+        }
+        if (!address) {
+            document.getElementById('address-error').textContent = 'Address is required.';
+            document.getElementById('address').classList.add('is-invalid');
             hasError = true;
         }
         if (hasError) return;
@@ -96,10 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setLoading(true);
         hideFormBanners();
 
-        const result = await VendorAPI.updateProfile({
-            organizationName: orgName,
-            phoneNumber
-        });
+        const result = await CustomerAPI.updateProfile({ phoneNumber, address });
 
         setLoading(false);
 
@@ -112,10 +85,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('form-success').textContent = result.message || 'Profile updated successfully.';
         document.getElementById('form-success').style.display = 'block';
 
-        // Reload profile view with updated data
         await loadProfile();
 
-        // Close edit form after short delay
         setTimeout(() => {
             document.getElementById('profile-edit').style.display = 'none';
             document.getElementById('edit-btn').style.display = 'inline-flex';

@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Listing - FoodLoop</title>
+    <title>Post Food Items - FoodLoop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .location-map { height: 220px; border-radius: 8px; margin-top: 8px; }
+    </style>
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
@@ -21,16 +25,16 @@
             <div class="sidebar-user">
                 <div class="sidebar-user-info">
                     <div class="sidebar-username" id="sidebar-username">Loading...</div>
-                    <div class="sidebar-role">Vendor / Household</div>
+                    <div class="sidebar-role">Food Providers</div>
                 </div>
             </div>
             <nav class="sidebar-nav">
-                <a href="vendor-dashboard.html" class="sidebar-link">Dashboard</a>
-                <a href="my-listings.html" class="sidebar-link">My Listings</a>
-                <a href="create-listing.html" class="sidebar-link active">Create Listing</a>
-                <a href="vendor-orders.html" class="sidebar-link">Orders</a>
-                <a href="vendor-transactions.html" class="sidebar-link">Transactions</a>
-                <a href="vendor-profile.html" class="sidebar-link">Profile</a>
+                <a href="food-providers-dashboard.html" class="sidebar-link">Dashboard</a>
+                <a href="my-food-items.html" class="sidebar-link">My Food Items</a>
+                <a href="post-food-items.html" class="sidebar-link active">Post Food Items</a>
+                <a href="food-providers-orders.html" class="sidebar-link">Orders</a>
+                <a href="food-providers-transactions.html" class="sidebar-link">Transactions</a>
+                <a href="food-providers-profile.html" class="sidebar-link">Profile</a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
@@ -44,7 +48,7 @@
                 <button class="topbar-toggle" id="sidebarToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="topbar-title">Create Listing</div>
+                <div class="topbar-title">Post Food Items</div>
             </header>
 
             <main class="dashboard-content">
@@ -54,7 +58,7 @@
                     <div class="form-error-banner" id="form-error" style="display:none;"></div>
                     <div class="form-success-banner" id="form-success" style="display:none;"></div>
 
-                    <form id="create-listing-form" novalidate>
+                    <form id="post-food-items-form" novalidate>
 
                         <div class="dash-form-group">
                             <label for="foodName">Food Name</label>
@@ -126,7 +130,7 @@
                             <label>Is delivery available?</label>
                             <div class="toggle-row">
                                 <button type="button" class="toggle-opt" id="delivery-yes" data-value="true">Yes</button>
-                                <button type="button" class="toggle-opt active" id="delivery-no" data-value="false">No</button>
+                                <button type="button" class="toggle-opt" id="delivery-no" data-value="false">No</button>
                             </div>
                         </div>
 
@@ -136,6 +140,26 @@
                             <div class="dash-field-error" id="deliveryFee-error"></div>
                         </div>
 
+                        <div class="dash-form-group">
+                            <label>Food Location</label>
+                            <div class="toggle-row">
+                                <button type="button" class="toggle-opt active" id="location-vendor" data-value="false">Same as my registered address</button>
+                                <button type="button" class="toggle-opt" id="location-custom" data-value="true">Different location for this item</button>
+                            </div>
+                        </div>
+
+                        <div id="custom-location-group" style="display:none;">
+                            <div class="dash-form-group">
+                                <label for="itemAddress">Item Address</label>
+                                <input type="text" id="itemAddress" class="dash-input" placeholder="e.g. 5 Marina Road, Lagos Island">
+                                <div class="dash-field-error" id="itemAddress-error"></div>
+                            </div>
+                            <div class="dash-form-group">
+                                <label>Pin on Map</label>
+                                <div id="location-map" class="location-map"></div>
+                                <div class="dash-field-error" id="location-error"></div>
+                            </div>
+                        </div>
 
                         <div class="dash-form-group">
                             <label for="images">Upload Images (max 5, jpg/png/webp, max 5MB each)</label>
@@ -149,7 +173,7 @@
                         </div>
 
                         <button type="submit" class="btn-submit-listing" id="submit-btn">
-                            <span id="btn-text">Create Listing</span>
+                            <span id="btn-text">Post Food Items</span>
                             <span class="spinner" id="btn-spinner"></span>
                         </button>
 
@@ -163,6 +187,8 @@
 
     <script src="utils.js"></script>
     <script src="api.js"></script>
-    <script src="create-listing.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="location-picker.js"></script>
+    <script src="post-food-items.js"></script>
 </body>
 </html>

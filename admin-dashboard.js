@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('pending-vendors').innerHTML =
-                `<div class="empty-state"><p>Could not load pending vendors.</p></div>`;
+                `<div class="empty-state"><p>Could not load pending food providers.</p></div>`;
             document.getElementById('stat-pending').textContent = '0';
             return;
         }
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (vendors.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <p>No pending approvals. All vendors have been reviewed.</p>
+                    <p>No pending approvals. All food providers have been reviewed.</p>
                 </div>`;
             return;
         }
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <table class="dash-table">
                 <thead>
                     <tr>
-                        <th>Organization / Household</th>
+                        <th>Food Providers</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Registered</th>
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('recent-listings').innerHTML =
-                `<div class="empty-state"><p>Could not load listings.</p></div>`;
+                `<div class="empty-state"><p>Could not load food items.</p></div>`;
             document.getElementById('stat-listings').textContent = '0';
             return;
         }
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (recent.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <p>No listings on the platform yet.</p>
+                    <p>No food items on the platform yet.</p>
                 </div>`;
             return;
         }
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <thead>
                     <tr>
                         <th>Food Name</th>
-                        <th>Vendor / Household</th>
+                        <th>Food Providers</th>
                         <th>Price</th>
                         <th>Remaining</th>
                         <th>Status</th>
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         showToast(
-            isApproved ? 'Vendor approved successfully.' : 'Vendor rejected.',
+            isApproved ? 'Food provider approved successfully.' : 'Food provider rejected.',
             isApproved ? 'success' : 'warning'
         );
 

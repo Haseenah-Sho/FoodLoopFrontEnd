@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+
     // Redirect if already logged in
     if (Auth.isLoggedIn()) {
         redirectToDashboard(Auth.getUser().roles || []);
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 if (result.data.roles.includes('app_vendor')) {
     const profileResult = await VendorAPI.getProfile();
     if (profileResult.isSuccessful) {
-        localStorage.setItem('fl_vendor_id', profileResult.data.vendorId);
+        sessionStorage.setItem('fl_vendor_id', profileResult.data.vendorId);
     }
 }
 
@@ -123,7 +125,9 @@ if (result.data.roles.includes('app_vendor')) {
         if (roles.includes('app_admin')) {
             window.location.href = 'admin-dashboard.html';
         } else if (roles.includes('app_vendor')) {
-            window.location.href = 'vendor-dashboard.html';
+            window.location.href = 'food-providers-dashboard.html';
+        } else if (returnUrl && roles.includes('app_customer')) {
+            window.location.href = returnUrl;
         } else {
             window.location.href = 'customer-dashboard.html';
         }

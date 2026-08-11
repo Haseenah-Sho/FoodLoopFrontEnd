@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!requireAuth(['app_vendor'])) return;
 
     const user = Auth.getUser();
-    const name = user.name || 'Vendor';
+    const name = user.name || 'Food Provider';
     document.getElementById('sidebar-username').textContent = name;
 
     setupSidebar();

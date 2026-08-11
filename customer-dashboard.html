@@ -29,12 +29,10 @@
 
             <nav class="sidebar-nav">
                 <a href="customer-dashboard.html" class="sidebar-link active">Dashboard</a>
-                <a href="index.html" class="sidebar-link">Browse Food</a>
+                <a href="index.html#listings" class="sidebar-link">Browse Food</a>
                 <a href="my-orders.html" class="sidebar-link">My Orders</a>
-                <a href="my-payments.html" class="sidebar-link">My Payments</a>
-                <a href="notifications.html" class="sidebar-link">Notifications
-                    <!-- <span class="notif-badge" id="notif-badge" style="display:none;"></span> -->
-                </a>
+                <a href="notifications.html" class="sidebar-link">Notifications</a>
+                <a href="customer-profile.html" class="sidebar-link">Profile</a>
             </nav>
 
             <div class="sidebar-bottom">
@@ -55,6 +53,25 @@
                 </button>
                 <div class="topbar-title" id="topbar-title">Dashboard</div>
                 <div class="topbar-right">
+                    <div class="topbar-actions">
+                        <a href="checkout.html" class="topbar-cart-btn" aria-label="Cart">
+                            <i class="bi bi-cart3"></i>
+                            <span class="topbar-badge" id="cart-badge" style="display:none;"></span>
+                        </a>
+                        <div class="notif-bell-wrap">
+                            <button class="topbar-bell-btn" id="notifBellBtn" aria-label="Notifications">
+                                <i class="bi bi-bell"></i>
+                                <span class="topbar-badge" id="notifBadge" style="display:none;"></span>
+                            </button>
+                            <div class="notif-dropdown" id="notifDropdown">
+                                <div class="notif-dropdown-head">
+                                    <span>Notifications</span>
+                                    <button class="notif-mark-read-btn" id="notifMarkReadBtn">Mark all read</button>
+                                </div>
+                                <div id="notifList"><div class="notif-empty">Loading...</div></div>
+                            </div>
+                        </div>
+                    </div>
                     <span class="topbar-greeting" id="topbar-greeting"></span>
                 </div>
             </header>
@@ -63,23 +80,17 @@
             <main class="dashboard-content">
 
                 <!-- Stats row -->
-                <div class="stats-row">
+                <div class="stats-row two-col">
                     <div class="stat-card">
                         <div class="stat-info">
                             <div class="stat-value" id="stat-total-orders">—</div>
-                            <div class="stat-label">Total Orders</div>
+                            <div class="stat-label">Total Completed Orders</div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-info">
-                            <div class="stat-value" id="stat-active-orders">—</div>
-                            <div class="stat-label">Active Orders</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-info">
-                            <div class="stat-value" id="stat-total-spent">—</div>
-                            <div class="stat-label">Total Spent</div>
+                            <div class="stat-value" id="stat-food-items">—</div>
+                            <div class="stat-label">Total Food Items Rescued</div>
                         </div>
                     </div>
                 </div>
@@ -88,20 +99,18 @@
                 <div class="quick-action">
                     <div class="quick-action-text">
                         <h3>Hungry? Find surplus food near you</h3>
-                        <p>Browse active listings and grab a meal before it runs out.</p>
+                        <p>Browse available food items and grab a meal before it runs out.</p>
                     </div>
                     <a href="index.html#listings" class="btn-primary-sm">Browse Food</a>
                 </div>
 
-                <!-- Recent orders -->
+                <!-- My Orders preview -->
                 <div class="section">
                     <div class="section-top">
-                        <h2>Recent Orders</h2>
+                        <h2>My Orders</h2>
                         <a href="my-orders.html" class="section-link">View all</a>
                     </div>
-                    <div id="recent-orders">
-                        
-                    </div>
+                    <div id="dashboard-orders"></div>
                 </div>
 
             </main>
@@ -110,7 +119,9 @@
 
     <script src="utils.js"></script>
     <script src="api.js"></script>
+    <script src="cart.js"></script>
     <script src="signalr.js"></script>
+    <script src="notif-bell.js"></script>
     <script src="customer-dashboard.js"></script>
 </body>
 </html>

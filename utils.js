@@ -1,20 +1,20 @@
 const BASE_URL = 'https://localhost:7208/api';
 
 const Auth = {
-    getToken: () => localStorage.getItem('fl_token'),
-    setToken: (token) => localStorage.setItem('fl_token', token),
-    removeToken: () => localStorage.removeItem('fl_token'),
-    getUser: () => JSON.parse(localStorage.getItem('fl_user') || '{}'),
-    setUser: (user) => localStorage.setItem('fl_user', JSON.stringify(user)),
-    removeUser: () => localStorage.removeItem('fl_user'),
-    isLoggedIn: () => !!localStorage.getItem('fl_token'),
+    getToken: () => sessionStorage.getItem('fl_token'),
+    setToken: (token) => sessionStorage.setItem('fl_token', token),
+    removeToken: () => sessionStorage.removeItem('fl_token'),
+    getUser: () => JSON.parse(sessionStorage.getItem('fl_user') || '{}'),
+    setUser: (user) => sessionStorage.setItem('fl_user', JSON.stringify(user)),
+    removeUser: () => sessionStorage.removeItem('fl_user'),
+    isLoggedIn: () => !!sessionStorage.getItem('fl_token'),
     hasRole: (role) => {
         const user = Auth.getUser();
         return user.roles && user.roles.includes(role);
     },
     logout: () => {
-    localStorage.removeItem('fl_token');
-    localStorage.removeItem('fl_user');
+    sessionStorage.removeItem('fl_token');
+    sessionStorage.removeItem('fl_user');
     window.location.href = 'login.html';
 }
 };

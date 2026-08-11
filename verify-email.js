@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const params = new URLSearchParams(window.location.search);
+    const returnUrl = params.get('returnUrl');
+    const prefillEmail = params.get('email');
+
     const form = document.getElementById('verify-form');
     const btnText = document.getElementById('btn-text');
     const btnSpinner = document.getElementById('btn-spinner');
     const verifyBtn = document.getElementById('verify-btn');
+
+    if (prefillEmail) {
+        document.getElementById('emailInput').value = prefillEmail;
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -37,7 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showFormSuccess('Email verified successfully! Redirecting to login...');
-        setTimeout(() => window.location.href = 'login.html', 2000);
+        const loginUrl = returnUrl ? `login.html?returnUrl=${encodeURIComponent(returnUrl)}` : 'login.html';
+        setTimeout(() => window.location.href = loginUrl, 2000);
     });
 
     function setLoading(loading) {

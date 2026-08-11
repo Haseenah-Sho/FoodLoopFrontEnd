@@ -43,34 +43,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await OrderAPI.getMyOrders();
 
         if (!result.isSuccessful) {
-            document.getElementById('recent-orders').innerHTML =
+            document.getElementById('dashboard-orders').innerHTML =
                 `<div class="empty-state"><p>Could not load orders.</p></div>`;
             return;
         }
 
         const orders = result.data || [];
 
-        // Stats
-        const active = orders.filter(o =>
-            o.status === 'Pending' || o.status === 'Confirmed').length;
-
-        const spent = orders
+        // Stats — cancelled orders don't count toward the total; food items only count once actually rescued (Completed)
+        const countedOrders = orders.filter(o => o.status !== 'Cancelled');
+        const foodItemsRescued = orders
             .filter(o => o.status === 'Completed')
-            .reduce((sum, o) => sum + o.totalAmount, 0);
+            .reduce((sum, o) => sum + (o.listingNames?.length || 0), 0);
 
-        document.getElementById('stat-total-orders').textContent = orders.length;
-        document.getElementById('stat-active-orders').textContent = active;
-        document.getElementById('stat-total-spent').textContent =
-            spent > 0 ? formatCurrency(spent) : '₦0';
+        document.getElementById('stat-total-orders').textContent = countedOrders.length;
+        document.getElementById('stat-food-items').textContent = foodItemsRescued;
 
-        // Recent orders table (last 5)
+        // Recent orders preview (last 5)
         const recent = orders.slice(0, 5);
-        const container = document.getElementById('recent-orders');
+        const container = document.getElementById('dashboard-orders');
 
         if (recent.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <i class="bi bi-bag"></i>
                     <p>You haven't placed any orders yet. <a href="index.html#listings">Browse food</a> to get started.</p>
                 </div>`;
             return;
@@ -81,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <thead>
                     <tr>
                         <th>Order No</th>
-                        <th>Items</th>
+                        <th>Food Items</th>
                         <th>Amount</th>
                         <th>Status</th>
                         <th>Date</th>
@@ -89,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </thead>
                 <tbody>
                     ${recent.map(o => `
-                        <tr>
+                        <tr class="clickable-row" onclick="window.location.href='order-detail.html?id=${o.orderId}'">
                             <td class="food-name">${o.orderNo}</td>
                             <td>${o.listingNames?.join(', ') || '—'}</td>
                             <td>${o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free'}</td>
@@ -111,15 +106,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
     }
 
-    function formatCurrency(amount) {
-        return '₦' + Number(amount).toLocaleString('en-NG');
-    }
-
     function formatDateShort(dateString) {
         if (!dateString) return '—';
         return new Date(dateString).toLocaleDateString('en-NG', {
             year: 'numeric', month: 'short', day: 'numeric'
         });
+    }
+
+    function formatCurrency(amount) {
+        return '₦' + Number(amount).toLocaleString('en-NG');
     }
 
 });

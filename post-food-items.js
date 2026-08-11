@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!requireAuth(['app_vendor'])) return;
 
     const user = Auth.getUser();
-    const name = user.name || 'Vendor';
+    const name = user.name || 'Food Provider';
     document.getElementById('sidebar-username').textContent = name;
 
     setupSidebar();
@@ -56,6 +56,30 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('delivery-no').classList.add('active');
         document.getElementById('delivery-yes').classList.remove('active');
         document.getElementById('delivery-fee-group').style.display = 'none';
+    });
+
+    // ── Toggle: Item location ──
+    let useCustomLocation = false;
+    let itemLocationPicker = null;
+
+    document.getElementById('location-vendor').addEventListener('click', () => {
+        useCustomLocation = false;
+        document.getElementById('location-vendor').classList.add('active');
+        document.getElementById('location-custom').classList.remove('active');
+        document.getElementById('custom-location-group').style.display = 'none';
+    });
+
+    document.getElementById('location-custom').addEventListener('click', () => {
+        useCustomLocation = true;
+        document.getElementById('location-custom').classList.add('active');
+        document.getElementById('location-vendor').classList.remove('active');
+        document.getElementById('custom-location-group').style.display = 'block';
+
+        if (!itemLocationPicker) {
+            itemLocationPicker = createLocationPicker('location-map');
+        } else {
+            itemLocationPicker.refresh();
+        }
     });
 
     // ── Image upload ──
@@ -112,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ── Form submit ──
-    document.getElementById('create-listing-form').addEventListener('submit', async (e) => {
+    document.getElementById('post-food-items-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const foodName = document.getElementById('foodName').value.trim();
@@ -134,6 +158,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pickupAvailable && !pickUpStart) { showDashFieldError('pickUpStart', 'Pickup start time is required.'); hasError = true; }
         if (pickupAvailable && !pickUpEnd) { showDashFieldError('pickUpEnd', 'Pickup end time is required.'); hasError = true; }
         if (selectedFiles.length === 0) { showDashFieldError('images', 'Please upload at least one image.'); hasError = true; }
+        let itemAddress = null;
+        let itemLocation = null;
+        if (useCustomLocation) {
+            itemAddress = document.getElementById('itemAddress').value.trim();
+            itemLocation = itemLocationPicker ? itemLocationPicker.getLocation() : null;
+
+            if (!itemAddress) { showDashFieldError('itemAddress', 'Address is required for a custom location.'); hasError = true; }
+            if (!itemLocation) {
+                document.getElementById('location-error').textContent = 'Please click on the map to pin this item\'s location.';
+                hasError = true;
+            }
+        }
         if (!pickupAvailable && !deliveryAvailable) {
             showFormBanner('error', 'At least one option (pickup or delivery) must be selected.');
             hasError = true;
@@ -156,18 +192,23 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('PickUpStart', pickUpStart ? new Date(pickUpStart).toISOString() : new Date().toISOString());
         formData.append('PickUpEnd', pickUpEnd ? new Date(pickUpEnd).toISOString() : new Date().toISOString());
         formData.append('DeliveryFee', deliveryAvailable ? deliveryFee : 0);
+        if (useCustomLocation && itemLocation) {
+            formData.append('Address', itemAddress);
+            formData.append('Latitude', itemLocation.lat);
+            formData.append('Longitude', itemLocation.lng);
+        }
         selectedFiles.forEach(file => formData.append('Images', file));
 
         const result = await ListingAPI.create(formData);
         setLoading(false);
 
         if (!result.isSuccessful) {
-            showFormBanner('error', result.message || 'Failed to create listing.');
+            showFormBanner('error', result.message || 'Failed to Post Food Items.');
             return;
         }
 
-        showFormBanner('success', 'Listing created successfully!');
-        setTimeout(() => window.location.href = 'my-listings.html', 1500);
+        showFormBanner('success', 'Food item posted successfully!');
+        setTimeout(() => window.location.href = 'my-food-items.html', 1500);
     });
 
     function showDashFieldError(fieldId, message) {

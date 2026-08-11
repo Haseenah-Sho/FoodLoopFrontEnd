@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('vendors-container').innerHTML =
-                `<div class="empty-state"><p>Could not load vendors.</p></div>`;
+                `<div class="empty-state"><p>Could not load food providers.</p></div>`;
             return;
         }
 
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (vendors.length === 0) {
             container.innerHTML =
-                `<div class="empty-state"><p>No vendors found.</p></div>`;
+                `<div class="empty-state"><p>No food providers found.</p></div>`;
             return;
         }
 
@@ -51,10 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             <table class="dash-table">
                 <thead>
                     <tr>
-                        <th>Organization / Household</th>
+                        <th>Food Providers</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Listings</th>
+                        <th>Food Items</th>
                         <th>Status</th>
                         <th>Joined</th>
                         <th>Action</th>
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         showToast(
-            isApproved ? 'Vendor approved.' : 'Vendor rejected/revoked.',
+            isApproved ? 'Food provider approved.' : 'Food provider rejected/revoked.',
             isApproved ? 'success' : 'warning'
         );
 

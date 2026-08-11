@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('listings-container').innerHTML =
-                `<div class="empty-state"><p>Could not load listings.</p></div>`;
+                `<div class="empty-state"><p>Could not load food items.</p></div>`;
             return;
         }
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (listings.length === 0) {
             container.innerHTML =
-                `<div class="empty-state"><p>No listings found.</p></div>`;
+                `<div class="empty-state"><p>No food items found.</p></div>`;
             return;
         }
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <thead>
                     <tr>
                         <th>Food Name</th>
-                        <th>Vendor</th>
+                        <th>Food Provider</th>
                         <th>Price</th>
                         <th>Quantity</th>
                         <th>Remaining</th>

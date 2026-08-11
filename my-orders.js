@@ -68,16 +68,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                             ${statusPill(o.status)}
                             ${o.status === 'Pending' ? `
-                                <a href="${o.paymentAuthorizationUrl || '#'}"
-                                   class="btn-primary-sm"
+                                <button class="btn-primary-sm pay-now-btn"
+                                   data-order-id="${o.orderId}"
                                    style="font-size:0.75rem;padding:5px 12px;"
                                    onclick="event.stopPropagation()">
                                    Pay Now
-                                </a>` : ''}
+                                </button>` : ''}
                         </div>
                     </div>
                 `).join('')}
             </div>`;
+
+        container.querySelectorAll('.pay-now-btn').forEach(btn => {
+            btn.addEventListener('click', () => payNow(btn.dataset.orderId, btn));
+        });
+    }
+
+    async function payNow(orderId, btn) {
+        btn.disabled = true;
+        btn.textContent = 'Redirecting...';
+
+        const result = await OrderAPI.resumePayment(orderId);
+
+        if (!result.isSuccessful || !result.data?.paymentAuthorizationUrl) {
+            showToast(result.message || 'Could not start payment.', 'error');
+            btn.disabled = false;
+            btn.textContent = 'Pay Now';
+            return;
+        }
+
+        window.location.href = result.data.paymentAuthorizationUrl;
     }
 
     function statusPill(status) {

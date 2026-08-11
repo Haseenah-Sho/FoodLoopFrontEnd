@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!requireAuth(['app_vendor'])) return;
 
     const user = Auth.getUser();
-    const name = user.name || 'Vendor';
+    const name = user.name || 'Food Provider';
     document.getElementById('sidebar-username').textContent = name;
 
     setupSidebar();
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('listings-grid').innerHTML =
-                `<div class="empty-state"><p>Could not load listings.</p></div>`;
+                `<div class="empty-state"><p>Could not load food items.</p></div>`;
             return;
         }
 
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (listings.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
-                    <p>No listings found. <a href="create-listing.html">Create your first listing</a>.</p>
+                    <p>No listings found. <a href="post-food-items.html">Create your first listing</a>.</p>
                 </div>`;
             return;
         }

@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Route "Back" to the right place depending on where the customer came from
+
     const params = new URLSearchParams(window.location.search);
     const listingId = params.get('id');
 
@@ -39,83 +41,123 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderListing(l) {
-        document.title = `${l.foodName} — FoodLoop`;
+    document.title = `${l.foodName} — FoodLoop`;
 
-        let imgSrc = l.imageUrls && l.imageUrls.length > 0 ? l.imageUrls[0] : null;
-if (imgSrc && imgSrc.startsWith('/')) {
-    imgSrc = `https://localhost:7208${imgSrc}`;
-}
+    // Show panels
+    document.getElementById('detail-loading').style.display = 'none';
+    document.getElementById('image-panel').style.display = 'flex';
+    document.getElementById('info-panel').style.display = 'flex';
 
-if (imgSrc) {
+    // Image gallery
+    let imageUrls = (l.imageUrls || []).map(u => u.startsWith('/') ? `https://localhost:7208${u}` : u);
     const img = document.getElementById('detail-img');
-    img.src = imgSrc;
-    img.alt = l.foodName;
-    img.onerror = function() {
-        this.style.display = 'none';
-        document.getElementById('detail-img-placeholder').style.display = 'flex';
-    };
-} else {
-    document.getElementById('detail-img').style.display = 'none';
-    document.getElementById('detail-img-placeholder').style.display = 'flex';
-}
-        document.getElementById('detail-name').textContent = l.foodName;
-        document.getElementById('detail-vendor').innerHTML =
-            `${l.vendorName}`;
+    const placeholder = document.getElementById('detail-img-placeholder');
+    const thumbStrip = document.getElementById('detail-thumb-strip');
 
-        const badge = document.getElementById('detail-badge');
-        badge.textContent = l.isFree ? 'Free' : 'Discounted';
-        badge.className = l.isFree ? 'badge-free' : 'badge-paid';
-
-        const priceEl = document.getElementById('detail-price');
-        if (l.isFree) {
-            priceEl.textContent = 'Free';
-            priceEl.classList.add('free-price');
-        } else {
-            priceEl.textContent = formatCurrency(l.price);
+    function showImage(src) {
+        if (!src) {
+            img.style.display = 'none';
+            placeholder.style.display = 'flex';
+            return;
         }
-
-        const portionsEl = document.getElementById('detail-portions');
-        const isLow = l.remainingPortion <= 3 && l.remainingPortion > 0;
-        portionsEl.innerHTML = `
-            ${l.remainingPortion} portion${l.remainingPortion !== 1 ? 's' : ''} left
-        `;
-        if (isLow) portionsEl.classList.add('low');
-
-        document.getElementById('detail-description').textContent = l.foodDescription;
-
-        if (l.pickUpAvailable) {
-            document.getElementById('detail-pickup').style.display = 'flex';
-            document.getElementById('detail-pickup-window').textContent =
-                `${formatDate(l.pickUpStart)} - ${formatDate(l.pickUpEnd)}`;
-        }
-
-        if (l.deliveryAvailable) {
-            document.getElementById('detail-delivery').style.display = 'flex';
-            document.getElementById('detail-delivery-fee').textContent =
-                l.deliveryFee > 0 ? formatCurrency(l.deliveryFee) : 'Free delivery';
-        }
-
-        document.getElementById('detail-qty-per-unit').textContent =
-            `${l.quantityPerUnit} serving${l.quantityPerUnit !== 1 ? 's' : ''} per portion`;
-
-        const isSoldOut = l.status !== 'Active' || l.remainingPortion <= 0;
-
-        if (isSoldOut) {
-            document.getElementById('sold-out').style.display = 'flex';
-        } else if (!Auth.isLoggedIn()) {
-            document.getElementById('login-prompt').style.display = 'flex';
-        } else if (!Auth.hasRole('app_customer')) {
-            document.getElementById('login-prompt').style.display = 'flex';
-            document.getElementById('login-prompt').querySelector('p').textContent =
-                'Only customers can place orders.';
-        } else {
-            document.getElementById('order-form').style.display = 'flex';
-            setupOrderForm(l);
-        }
-
-        document.getElementById('detail-loading').style.display = 'none';
-        document.getElementById('detail-content').style.display = 'block';
+        img.style.display = 'block';
+        placeholder.style.display = 'none';
+        img.src = src;
+        img.alt = l.foodName;
+        img.onerror = function() {
+            this.style.display = 'none';
+            placeholder.style.display = 'flex';
+        };
     }
+
+    showImage(imageUrls[0] || null);
+
+    if (imageUrls.length > 1) {
+        thumbStrip.style.display = 'flex';
+        thumbStrip.innerHTML = imageUrls.map((url, i) =>
+            `<img src="${url}" class="detail-thumb${i === 0 ? ' active' : ''}" data-index="${i}">`
+        ).join('');
+
+        thumbStrip.querySelectorAll('.detail-thumb').forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                const index = parseInt(thumb.dataset.index);
+                showImage(imageUrls[index]);
+                thumbStrip.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+            });
+        });
+    } else {
+        thumbStrip.style.display = 'none';
+        thumbStrip.innerHTML = '';
+    }
+
+    // Name + vendor
+    document.getElementById('detail-name').textContent = l.foodName;
+    document.getElementById('detail-vendor').innerHTML =
+        `${l.vendorName}`;
+        // Location + distance (uses the customer's own browser location, if they allow it —
+    // never sent anywhere, just used client-side for this one calculation)
+    const locationEl = document.getElementById('detail-location');
+    const mapUrl = `https://www.openstreetmap.org/?mlat=${l.latitude}&mlon=${l.longitude}#map=16/${l.latitude}/${l.longitude}`;
+    locationEl.innerHTML = `<i class="bi bi-geo-alt"></i> ${l.address} · <a href="${mapUrl}" target="_blank" rel="noopener">View on map</a>`;
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const distanceKm = haversineDistanceKm(
+                pos.coords.latitude, pos.coords.longitude, l.latitude, l.longitude
+            );
+            const distanceText = distanceKm < 1
+                ? `${Math.round(distanceKm * 1000)} m away`
+                : `${distanceKm.toFixed(1)} km away`;
+            locationEl.innerHTML = `<i class="bi bi-geo-alt"></i> ${l.address} · ${distanceText} · <a href="${mapUrl}" target="_blank" rel="noopener">View on map</a>`;
+        }, () => { /* permission denied or unavailable — the address + map link above still shows */ });
+    }
+
+    // Badge
+    const badge = document.getElementById('detail-badge');
+    badge.textContent = l.isFree ? 'Free' : 'Discounted';
+    badge.className = l.isFree ? 'badge-free' : 'badge-paid';
+
+    // Price
+    const priceEl = document.getElementById('detail-price');
+    priceEl.textContent = l.isFree ? 'Free' : formatCurrency(l.price);
+    if (l.isFree) priceEl.classList.add('free');
+
+    // Portions
+    const portionsEl = document.getElementById('detail-portions');
+    const isLow = l.remainingPortion <= 3 && l.remainingPortion > 0;
+    portionsEl.innerHTML = `${l.remainingPortion} left`;
+    if (isLow) portionsEl.classList.add('low');
+
+    // Description
+    document.getElementById('detail-description').textContent = l.foodDescription;
+
+    // Meta pills
+    const meta = document.getElementById('detail-meta');
+    const pills = [];
+    if (l.pickUpAvailable) pills.push(`<span class="meta-pill">Pickup: ${formatDate(l.pickUpStart)} – ${formatDate(l.pickUpEnd)}</span>`);
+    if (l.deliveryAvailable) pills.push(`<span class="meta-pill">Delivery ${l.deliveryFee > 0 ? formatCurrency(l.deliveryFee) : '(free)'}</span>`);
+    pills.push(`<span class="meta-pill">${l.quantityPerUnit} serving${l.quantityPerUnit !== 1 ? 's' : ''}/portion</span>`);
+    meta.innerHTML = pills.join('');
+
+    // Action panel — hide all three first so re-renders (e.g. after placing an order) don't stack them
+    document.getElementById('sold-out').style.display = 'none';
+    document.getElementById('login-prompt').style.display = 'none';
+    document.getElementById('order-form').style.display = 'none';
+
+    const isSoldOut = l.status !== 'Active' || l.remainingPortion <= 0;
+    if (isSoldOut) {
+        document.getElementById('sold-out').style.display = 'flex';
+    } else if (!Auth.isLoggedIn() || !Auth.hasRole('app_customer')) {
+        const returnUrl = encodeURIComponent(window.location.href);
+        document.getElementById('login-prompt-link').href = `login.html?returnUrl=${returnUrl}`;
+        document.getElementById('register-prompt-link').href = `register-customer.html?returnUrl=${returnUrl}`;
+        document.getElementById('login-prompt').style.display = 'flex';
+    } else {
+        document.getElementById('order-form').style.display = 'block';
+        setupOrderForm(l);
+    }
+}
 
     function setupOrderForm(l) {
         const fulfilmentBtns = document.getElementById('fulfillment-btns');
@@ -141,6 +183,12 @@ if (imgSrc) {
         const qtyInput = document.getElementById('orderQuantity');
         const maxQty = l.remainingPortion;
 
+        const requestedQty = parseInt(params.get('qty'));
+        if (requestedQty && requestedQty > 0) {
+            quantity = Math.min(requestedQty, maxQty);
+            qtyInput.value = quantity;
+        }
+
         document.getElementById('qty-plus').addEventListener('click', () => {
             if (quantity < maxQty) {
                 quantity++;
@@ -159,6 +207,42 @@ if (imgSrc) {
 
         updateTotal(l);
         document.getElementById('order-btn').addEventListener('click', () => placeOrder(l));
+        document.getElementById('add-cart-btn').addEventListener('click', () => addToCart(l));
+    }
+
+    function addToCart(l) {
+        const btn = document.getElementById('add-cart-btn');
+        const cartItem = {
+            listingId,
+            vendorId: l.vendorId,
+            vendorName: l.vendorName,
+            foodName: l.foodName,
+            isFree: l.isFree,
+            price: l.price,
+            remainingPortion: l.remainingPortion,
+            imageUrls: l.imageUrls,
+            pickUpAvailable: l.pickUpAvailable,
+            deliveryAvailable: l.deliveryAvailable,
+            deliveryFee: l.deliveryFee
+        };
+
+        const result = Cart.add(cartItem, quantity);
+
+        if (!result.success && result.conflict) {
+            const proceed = confirm(
+                `Your cart has items from ${result.vendorName}. An order can only include items from one food provider. Clear your cart and add this item instead?`
+            );
+            if (!proceed) return;
+            Cart.clear();
+            Cart.add(cartItem, quantity);
+        }
+
+        btn.classList.add('added');
+        btn.innerHTML = '<i class="bi bi-check2"></i> Added to Cart';
+        setTimeout(() => {
+            btn.classList.remove('added');
+            btn.innerHTML = '<i class="bi bi-cart-plus"></i> Add to Cart';
+        }, 1500);
     }
 
     function createFulfilmentBtn(value, label) {
@@ -211,7 +295,7 @@ if (imgSrc) {
 
         const payload = {
             items: [{ listingId: listingId, quantity }],
-            fulfilmentType: selectedFulfilment === 'PickUp' ? 0 : 1,
+            fulfilmentType: selectedFulfilment === 'PickUp' ? 1 : 2,
             deliveryAddress: selectedFulfilment === 'Delivery' ? deliveryAddress : null
         };
 
@@ -231,10 +315,11 @@ if (imgSrc) {
             return;
         }
 
-        showOrderSuccess('Order placed successfully! Check your orders for details.');
+        showOrderSuccess('Order placed successfully! Redirecting to your orders...');
         document.getElementById('order-btn').disabled = true;
-        await loadListing();
-        await loadRatings();
+        setTimeout(() => {
+            window.location.href = 'my-orders.html';
+        }, 1500);
     }
 
     async function loadRatings() {
@@ -257,7 +342,7 @@ if (imgSrc) {
 
         const list = document.getElementById('ratings-list');
         if (ratings.length === 0) {
-            list.innerHTML = `<p class="ratings-empty">No reviews yet. Be the first to review this listing.</p>`;
+            list.innerHTML = `<p class="ratings-empty">No reviews yet. Be the first to review this food item.</p>`;
         } else {
             list.innerHTML = ratings.map(r => `
                 <div class="rating-item">
@@ -395,7 +480,7 @@ if (imgSrc) {
     }
 
     function formatDate(dateString) {
-        if (!dateString) return '—';
+        if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('en-NG', {
             month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit'
@@ -403,10 +488,22 @@ if (imgSrc) {
     }
 
     function formatDateShort(dateString) {
-        if (!dateString) return '—';
+        if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('en-NG', {
             year: 'numeric', month: 'short', day: 'numeric'
         });
+    }
+
+    function haversineDistanceKm(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 
 });
