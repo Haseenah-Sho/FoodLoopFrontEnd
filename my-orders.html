@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - FoodLoop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="sidebar-logo">Food<span>Loop</span></a>
+                <button class="sidebar-close" id="sidebarClose">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-username" id="sidebar-username">Loading...</div>
+                    <div class="sidebar-role">Customer</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="customer-dashboard.html" class="sidebar-link">Dashboard</a>
+                <a href="index.html" class="sidebar-link">Browse Food</a>
+                <a href="my-orders.html" class="sidebar-link active">My Orders</a>
+                <a href="notifications.html" class="sidebar-link">Notifications</a>
+                <a href="customer-profile.html" class="sidebar-link">Profile</a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="dashboard-main">
+            <header class="topbar">
+                <button class="topbar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-title">My Orders</div>
+                <div class="topbar-right">
+                    <div class="topbar-actions">
+                        <a href="checkout.html" class="topbar-cart-btn" aria-label="Cart">
+                            <i class="bi bi-cart3"></i>
+                            <span class="topbar-badge" id="cart-badge" style="display:none;"></span>
+                        </a>
+                        <div class="notif-bell-wrap">
+                            <button class="topbar-bell-btn" id="notifBellBtn" aria-label="Notifications">
+                                <i class="bi bi-bell"></i>
+                                <span class="topbar-badge" id="notifBadge" style="display:none;"></span>
+                            </button>
+                            <div class="notif-dropdown" id="notifDropdown">
+                                <div class="notif-dropdown-head">
+                                    <span>Notifications</span>
+                                    <button class="notif-mark-read-btn" id="notifMarkReadBtn">Mark all read</button>
+                                </div>
+                                <div id="notifList"><div class="notif-empty">Loading...</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+
+                <!-- Filter tabs -->
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="Pending">Pending Payment</button>
+                    <button class="filter-tab" data-filter="Confirmed">Confirmed</button>
+                    <button class="filter-tab" data-filter="Completed">Completed</button>
+                    <button class="filter-tab" data-filter="Cancelled">Cancelled</button>
+                </div>
+
+                <div class="section">
+                    <div id="orders-container">
+                        
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="cart.js"></script>
+    <script src="signalr.js"></script>
+    <script src="notif-bell.js"></script>
+    <script src="my-orders.js"></script>
+</body>
+</html>

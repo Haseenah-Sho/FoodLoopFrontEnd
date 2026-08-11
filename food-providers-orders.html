@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders - FoodLoop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="sidebar-logo">Food<span>Loop</span></a>
+                <button class="sidebar-close" id="sidebarClose">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-username" id="sidebar-username">Loading...</div>
+                    <div class="sidebar-role">Food Providers</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="food-providers-dashboard.html" class="sidebar-link">Dashboard</a>
+                <a href="my-food-items.html" class="sidebar-link">My Food Items</a>
+                <a href="post-food-items.html" class="sidebar-link">Post Food Items</a>
+                <a href="food-providers-orders.html" class="sidebar-link active">Orders</a>
+                <a href="food-providers-transactions.html" class="sidebar-link">Transactions</a>
+                <a href="food-providers-profile.html" class="sidebar-link">Profile</a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <div class="dashboard-main">
+            <header class="topbar">
+                <button class="topbar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-title">Orders</div>
+            </header>
+
+            <main class="dashboard-content">
+
+                <!-- Order lookup -->
+                <div class="lookup-bar">
+                    <input
+                        type="text"
+                        id="orderNoInput"
+                        class="dash-input"
+                        placeholder="Enter order number to check order details e.g. FDL-20260624..."
+                        style="flex:1;"
+                    >
+                    <button class="btn-primary-sm" id="lookupBtn">Order Details</button>
+                </div>
+
+                <!-- Lookup result -->
+                <div id="lookup-result" style="display:none;" class="section" style="margin-bottom:24px;">
+                    <div class="section-top">
+                        <h2>Order Details</h2>
+                        <button class="section-link" onclick="closeLookup()" style="background:none;border:none;cursor:pointer;">
+                            Close
+                        </button>
+                    </div>
+                    <div id="lookup-content" style="padding:20px;"></div>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All</button>
+                    <button class="filter-tab" data-filter="Confirmed">Confirmed</button>
+                    <button class="filter-tab" data-filter="Completed">Completed</button>
+                    <button class="filter-tab" data-filter="Pending">Pending Payment</button>
+                </div>
+
+                <div class="section">
+                    <div id="orders-container">
+                        
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="signalr.js"></script>
+    <script src="food-providers-orders.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+.order-detail-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 26px 28px;
+    box-shadow: var(--card-shadow);
+    border: 2px solid var(--border);
+    max-width: 640px;
+}
+
+.order-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+}
+
+.order-detail-no {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -0.2px;
+}
+
+.order-detail-date {
+    font-size: 0.8rem;
+    color: var(--dark-muted);
+    margin-top: 3px;
+}
+
+.order-detail-vendor {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 18px;
+}
+
+.order-detail-vendor i {
+    font-size: 1.2rem;
+    color: var(--primary);
+}
+
+.od-vendor-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.od-vendor-phone {
+    font-size: 0.76rem;
+    color: var(--dark-muted);
+    margin-top: 2px;
+}
+
+.order-detail-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--dark-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+}
+
+.order-detail-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.od-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.od-item-img,
+.od-item-img-placeholder {
+    width: 52px;
+    height: 52px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: var(--surface-alt);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--border);
+    font-size: 1.2rem;
+}
+
+.od-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.od-item-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.od-item-sub {
+    font-size: 0.75rem;
+    color: var(--dark-muted);
+    margin-top: 2px;
+}
+
+.od-item-price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.order-detail-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 16px;
+}
+
+.od-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.od-meta-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--dark-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.od-meta span:last-child {
+    font-size: 0.85rem;
+    color: var(--dark);
+    font-weight: 500;
+}
+
+.order-detail-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 18px;
+}
+
+.order-detail-total-row span:last-child {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.order-detail-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-cancel-order {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--white);
+    color: #c62828;
+    border: 1.5px solid #ffcdd2;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel-order:hover {
+    background: #ffebee;
+}
+
+.btn-cancel-order:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-edit-order {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--white);
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit-order:hover {
+    background: var(--surface);
+}
+
+.btn-edit-order:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

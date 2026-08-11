@@ -7,7 +7,6 @@ async function apiFetch(endpoint, options = {}) {
         ...options.headers
     };
 
-    // For FormData (file uploads), remove Content-Type and let browser set it
     if (options.body instanceof FormData) {
         delete headers['Content-Type'];
     }
@@ -43,6 +42,22 @@ const VendorAPI = {
     updateProfile: (data) => apiFetch('/vendor/profile', { method: 'PUT', body: JSON.stringify(data) }),
     getPending: () => apiFetch('/vendor/pending'),
     approveReject: (data) => apiFetch('/vendor/approve-reject', { method: 'PUT', body: JSON.stringify(data) }),
+    getBanks: () => apiFetch('/vendor/banks'),
+    resolveAccount: (accountNumber, bankCode) => apiFetch(`/vendor/resolve-account?accountNumber=${accountNumber}&bankCode=${bankCode}`),
+    setBankDetails: (data) => apiFetch('/vendor/bank-details', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// Customer
+const CustomerAPI = {
+    getProfile: () => apiFetch('/customer/profile'),
+    updateProfile: (data) => apiFetch('/customer/profile', { method: 'PUT', body: JSON.stringify(data) }),
+};
+
+// Notifications
+const NotificationAPI = {
+    getMine: () => apiFetch('/notification/my-notifications'),
+    markRead: (id) => apiFetch(`/notification/mark-read/${id}`, { method: 'PUT' }),
+    markAllRead: () => apiFetch('/notification/mark-all-read', { method: 'PUT' }),
 };
 
 // Listings
@@ -50,6 +65,7 @@ const ListingAPI = {
     getAll: (isFree) => apiFetch(`/listing${isFree !== undefined ? `?isFree=${isFree}` : ''}`),
     getDetails: (id) => apiFetch(`/listing/${id}`),
     create: (formData) => apiFetch('/listing', { method: 'POST', body: formData }),
+    getVendorListings: () => apiFetch('/listing/vendor-listings'),
 };
 
 // Orders
@@ -62,6 +78,8 @@ const OrderAPI = {
     dispatchDelivery: (orderNo) => apiFetch(`/order/dispatch-order/${orderNo}`, { method: 'PUT' }),
     markDelivered: (orderNo) => apiFetch(`/order/mark-delivered/${orderNo}`, { method: 'PUT' }),
     getMyVendorOrders: () => apiFetch('/order/vendor-orders'),
+    cancelOrder: (orderId) => apiFetch(`/order/${orderId}`, { method: 'DELETE' }),
+    resumePayment: (orderId) => apiFetch(`/order/${orderId}/resume-payment`, { method: 'POST' }),
 };
 
 // Payments

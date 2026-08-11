@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Item Details - FoodLoop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="food-item-detail.css">
+</head>
+<body>
+
+    <!-- Compact navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Food<span>Loop</span></a>
+            <a href="index.html#listings" class="back-link">
+                <i class="bi bi-arrow-left"></i> Back to Browse Food
+            </a>
+            <a href="checkout.html" class="nav-cart-link" id="nav-cart-link">
+                <i class="bi bi-cart3"></i> Cart
+                <span class="sidebar-cart-badge" id="cart-badge" style="display:none;"></span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="detail-page">
+        <div class="detail-container" id="detail-container">
+
+            <!-- Loading state -->
+            <div class="detail-loading" id="detail-loading">
+            </div>
+
+            <!-- Error state -->
+            <div id="detail-error" class="detail-error" style="display:none;">
+                <i class="bi bi-exclamation-circle"></i>
+                <p>Food item not found or no longer available.</p>
+                <a href="index.html#listings" class="btn-back">Back to food items</a>
+            </div>
+
+            <!-- Image panel -->
+            <div class="detail-image-panel" id="image-panel" style="display:none;">
+                <div class="detail-img-wrap">
+                    <img id="detail-img" src="" alt="" class="detail-img">
+                    <div id="detail-img-placeholder" class="detail-img-placeholder" style="display:none;">
+                        <i class="bi bi-image"></i>
+                    </div>
+                </div>
+                <div class="detail-thumb-strip" id="detail-thumb-strip" style="display:none;"></div>
+            </div>
+
+            <!-- Info panel -->
+            <div class="detail-info-panel" id="info-panel" style="display:none;">
+
+                <!-- Header -->
+                <div class="detail-header">
+                    <div>
+                        <div class="detail-title" id="detail-name"></div>
+                        <div class="detail-vendor" id="detail-vendor"></div>
+                        <div class="detail-location" id="detail-location"></div>
+                    </div>
+                    <span id="detail-badge"></span>
+                </div>
+
+                <!-- Price + portions -->
+                <div class="detail-price-row">
+                    <div class="detail-price" id="detail-price"></div>
+                    <div class="detail-portions" id="detail-portions"></div>
+                </div>
+
+                <!-- Description -->
+                <p class="detail-description" id="detail-description"></p>
+
+                <!-- Meta pills -->
+                <div class="detail-meta-row" id="detail-meta"></div>
+
+                <!-- Order form / login prompt / sold out -->
+                <div id="order-form" style="display:none;">
+                    <div class="order-form">
+                        <div class="order-form-error" id="order-error" style="display:none;"></div>
+                        <div class="order-form-success" id="order-success" style="display:none;"></div>
+
+                        <div id="fulfillment-options">
+                            <p class="fulfillment-label">Fulfilment</p>
+                            <div class="fulfillment-btns" id="fulfillment-btns"></div>
+                        </div>
+
+                        <div id="delivery-address-wrap" style="display:none;">
+                            <input type="text" id="deliveryAddress" class="order-input" placeholder="Enter delivery address">
+                        </div>
+
+                        <div class="quantity-row">
+                            <span class="quantity-label">Portion</span>
+                            <div class="quantity-controls">
+                                <button type="button" id="qty-minus" class="qty-btn"><i class="bi bi-dash"></i></button>
+                                <input type="number" id="orderQuantity" class="qty-input" value="1" min="1" readonly>
+                                <button type="button" id="qty-plus" class="qty-btn"><i class="bi bi-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="order-total" id="order-total"></div>
+
+                        <button class="btn-order" id="order-btn">
+                            <span id="order-btn-text">Place Order</span>
+                            <span class="spinner" id="order-spinner"></span>
+                        </button>
+
+                        <button type="button" class="btn-add-cart" id="add-cart-btn">
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </button>
+                        <p class="add-cart-hint">Ordering more than one item from this food provider? Add each to your cart and check out once.</p>
+
+                        <p class="order-note">
+                            <i class="bi bi-clock"></i>
+                            First come, first served - act fast.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="login-prompt" id="login-prompt" style="display:none;">
+                    <a href="login.html" id="login-prompt-link" class="btn-login-prompt">Login to Order</a>
+                    <a href="register-customer.html" id="register-prompt-link" class="btn-register-prompt">Create an Account</a>
+                </div>
+
+                <div class="sold-out" id="sold-out" style="display:none;">
+                    <i class="bi bi-x-circle"></i>
+                    <p>This food item is no longer available.</p>
+                </div>
+
+                <!-- Ratings -->
+                <div class="ratings-section">
+                    <h2 class="ratings-title">
+                        Reviews
+                        <span class="ratings-count" id="ratings-count"></span>
+                    </h2>
+
+                    <div class="ratings-summary" id="ratings-summary" style="display:none;">
+                        <div class="rating-avg" id="rating-avg"></div>
+                        <div class="rating-stars" id="rating-stars"></div>
+                    </div>
+
+                    <div id="ratings-list" class="ratings-list"></div>
+
+                    <div class="add-rating" id="add-rating" style="display:none;">
+                        <h3>Leave a review</h3>
+                        <div class="star-picker" id="star-picker">
+                            <i class="bi bi-star" data-value="1"></i>
+                            <i class="bi bi-star" data-value="2"></i>
+                            <i class="bi bi-star" data-value="3"></i>
+                            <i class="bi bi-star" data-value="4"></i>
+                            <i class="bi bi-star" data-value="5"></i>
+                        </div>
+                        <textarea id="ratingComment" class="rating-textarea" placeholder="Share your experience (optional)" rows="2" maxlength="500"></textarea>
+                        <button class="btn-submit-rating" id="submit-rating-btn">
+                            <span id="rating-btn-text">Submit</span>
+                            <span class="spinner" id="rating-spinner"></span>
+                        </button>
+                        <div class="rating-form-error" id="rating-error" style="display:none;"></div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="cart.js"></script>
+    <script src="food-items-detail.js"></script>
+</body>
+</html>

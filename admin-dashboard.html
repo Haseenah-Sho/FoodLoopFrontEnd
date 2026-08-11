@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FoodLoop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <a href="index.html" class="sidebar-logo">Food<span>Loop</span></a>
+                <button class="sidebar-close" id="sidebarClose">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="sidebar-avatar"></div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-username" id="sidebar-username">Loading...</div>
+                    <div class="sidebar-role">Administrator</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="admin-dashboard.html" class="sidebar-link active">Dashboard</a>
+                <a href="admin-vendors.html" class="sidebar-link">Food Providers</a>
+                <a href="admin-customers.html" class="sidebar-link">Customers</a>
+                <a href="admin-listings.html" class="sidebar-link">Food Items</a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- MAIN CONTENT -->
+        <div class="dashboard-main">
+
+            <header class="topbar">
+                <button class="topbar-toggle" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="topbar-title">Admin Dashboard</div>
+                <div class="topbar-right">
+                    <span class="topbar-greeting" id="topbar-greeting"></span>
+                </div>
+            </header>
+
+            <main class="dashboard-content">
+
+                <!-- Stats -->
+                <div class="stats-row four-col" id="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-vendors">-</div>
+                            <div class="stat-label">Total Food Providers</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-pending">-</div>
+                            <div class="stat-label">Pending Approvals</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-customers">-</div>
+                            <div class="stat-label">Total Customers</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-info">
+                            <div class="stat-value" id="stat-listings">-</div>
+                            <div class="stat-label">Available Food Items</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending vendor approvals -->
+                <div class="section">
+                    <div class="section-top">
+                        <h2>Pending Food Providers Approvals</h2>
+                        <a href="admin-vendors.html" class="section-link">View all food providers</a>
+                    </div>
+                    <div id="pending-vendors">
+                        
+                    </div>
+                </div>
+
+                <!-- Recent listings -->
+                <div class="section">
+                    <div class="section-top">
+                        <h2>Recent Food Items</h2>
+                        <a href="admin-listings.html" class="section-link">View all</a>
+                    </div>
+                    <div id="recent-listings">
+                        
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="admin-dashboard.js"></script>
+</body>
+</html>

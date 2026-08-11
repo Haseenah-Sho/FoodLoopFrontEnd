@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+
     if (Auth.isLoggedIn()) {
         window.location.href = 'login.html';
         return;
@@ -14,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('togglePassword', 'passwordInput', 'toggleIcon');
     setupToggle('toggleConfirm', 'confirmPasswordInput', 'toggleConfirmIcon');
 
-    // Clear errors on input
+    
     ['fullNameInput','usernameInput','phoneInput','emailInput','addressInput','passwordInput','confirmPasswordInput']
         .forEach(id => {
             document.getElementById(id)?.addEventListener('input', () => {
@@ -61,7 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showToast('Account created! Please check your email for a verification code.', 'success');
-        setTimeout(() => window.location.href = 'verify-email.html', 2000);
+        const verifyUrl = returnUrl ? `verify-email.html?email=${encodeURIComponent(email)}&returnUrl=${encodeURIComponent(returnUrl)}` : `verify-email.html?email=${encodeURIComponent(email)}`;
+        setTimeout(() => window.location.href = verifyUrl, 2000);
     });
 
     function setLoading(loading) {
