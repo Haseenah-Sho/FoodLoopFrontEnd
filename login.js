@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
 
-    // Redirect if already logged in
+    
     if (Auth.isLoggedIn()) {
         redirectToDashboard(Auth.getUser().roles || []);
         return;
@@ -75,12 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Auth.setToken(result.data.token);
         Auth.setUser(result.data);
 
-if (result.data.roles.includes('app_vendor')) {
-    const profileResult = await VendorAPI.getProfile();
-    if (profileResult.isSuccessful) {
-        sessionStorage.setItem('fl_vendor_id', profileResult.data.vendorId);
-    }
-}
 
         showToast('Login successful!', 'success');
 

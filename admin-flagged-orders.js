@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!requireAuth(['app_admin'])) return;
 
+    const user = Auth.getUser();
+    const name = user.name || 'Admin';
+    document.getElementById('sidebar-username').textContent = name;
+
     setupSidebar();
     await loadFlagged();
 
@@ -20,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.textContent = 'Notify Vendor';
         }
     };
-    
+
     async function loadFlagged() {
         const result = await AdminAPI.getFlaggedOrders();
         const container = document.getElementById('flagged-container');

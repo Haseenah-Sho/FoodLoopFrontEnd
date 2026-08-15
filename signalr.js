@@ -51,16 +51,6 @@ function initSignalR() {
         conn.invoke('JoinUserGroup', user.userId.toString())
             .catch(err => console.error('JoinUserGroup error:', err));
 
-        // Vendors join their vendor group
-        // if (Auth.hasRole('app_vendor')) {
-        //     // We need vendorId — store it after login or profile load
-        //     const vendorId = sessionStorage.getItem('fl_vendor_id');
-        //     if (vendorId) {
-        //         conn.invoke('JoinVendorGroup', vendorId)
-        //             .catch(err => console.error('JoinVendorGroup error:', err));
-        //     }
-        // }
-
         // Everyone on public pages joins browse group
         if (document.getElementById('listings-grid')) {
             conn.invoke('JoinBrowseGroup')

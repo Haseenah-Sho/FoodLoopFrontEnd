@@ -4,8 +4,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const user = Auth.getUser();
     const name = user.name || 'Admin';
-    document.getElementById('sidebar-avatar').textContent =
-        name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
     document.getElementById('sidebar-username').textContent = name;
 
     setupSidebar();
