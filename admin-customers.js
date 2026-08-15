@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <td class="food-name">${c.name}</td>
                             <td>${c.email}</td>
                             <td>${c.phoneNumber}</td>
-                            <td>${c.address || '—'}</td>
+                            <td>${c.address || '-'}</td>
                             <td>${c.totalOrders}</td>
                             <td>${formatDateShort(c.dateJoined)}</td>
                         </tr>
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function formatDateShort(dateString) {
-        if (!dateString) return '—';
+        if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString('en-NG', {
             year: 'numeric', month: 'short', day: 'numeric'
         });

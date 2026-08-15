@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSidebar();
 
     let currentProfile = null;
-    let locationPicker = null;
     let banksList = [];
     let resolvedAccountName = null;
 
@@ -22,16 +21,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('orgName').value = currentProfile.organizationName;
         document.getElementById('phoneNumber').value = currentProfile.phoneNumber;
         document.getElementById('addressInput').value = currentProfile.address;
-
-        if (!locationPicker) {
-            locationPicker = createLocationPicker('location-map', {
-                lat: currentProfile.latitude,
-                lng: currentProfile.longitude
-            });
-        } else {
-            locationPicker.refresh();
-        }
-
         document.getElementById('profile-edit').scrollIntoView({ behavior: 'smooth' });
     });
 
@@ -55,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentProfile = result.data;
 
-        document.getElementById('view-fullname').textContent = user.name || '—';
+        document.getElementById('view-fullname').textContent = user.name || '-';
         document.getElementById('view-orgname').textContent = currentProfile.organizationName;
         document.getElementById('view-email').textContent = currentProfile.email;
         document.getElementById('view-phone').textContent = currentProfile.phoneNumber;
@@ -109,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await VendorAPI.getBanks();
 
         if (!result.isSuccessful || !result.data || result.data.length === 0) {
-            select.innerHTML = `<option value="">${result.message || 'Could not load banks — try refreshing'}</option>`;
+            select.innerHTML = `<option value="">${result.message || 'Could not load banks - try refreshing'}</option>`;
             return;
         }
 
@@ -193,6 +182,138 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadProfile();
     });
 
+    loadZones();
+
+    async function loadZones() {
+        const result = await VendorAPI.getDeliveryZones();
+        const list = document.getElementById('zones-list');
+
+        if (!result.isSuccessful) {
+            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${result.message || 'Could not load zones.'}</p>`;
+            return;
+        }
+
+        const zones = result.data || [];
+
+        if (zones.length === 0) {
+            list.innerHTML = `<p style="font-size:0.82rem;color:var(--dark-muted);">No delivery zones yet.</p>`;
+            return;
+        }
+
+        list.innerHTML = zones.map(z => `
+            <div class="zone-row">
+                <span><strong>${z.zoneName}</strong> - ₦${Number(z.fee).toLocaleString('en-NG')}</span>
+                <button class="zone-remove" onclick="removeZone('${z.zoneId}')"><i class="bi bi-trash"></i></button>
+            </div>
+        `).join('');
+    }
+
+    window.removeZone = async function(zoneId) {
+        if (!confirm('Remove this delivery zone?')) return;
+        const result = await VendorAPI.removeDeliveryZone(zoneId);
+        if (result.isSuccessful) {
+            await loadZones();
+        } else {
+            showToast(result.message || 'Could not remove zone.', 'error');
+        }
+    };
+
+    document.getElementById('add-zone-btn').addEventListener('click', async () => {
+        const zoneName = document.getElementById('zoneNameInput').value.trim();
+        const fee = parseFloat(document.getElementById('zoneFeeInput').value);
+        const errorEl = document.getElementById('zone-error');
+        errorEl.style.display = 'none';
+
+        if (!zoneName) {
+            errorEl.textContent = 'Please enter an area name.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        if (isNaN(fee) || fee < 0) {
+            errorEl.textContent = 'Please enter a valid delivery fee.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const result = await VendorAPI.addDeliveryZone({ zoneName, fee });
+
+        if (!result.isSuccessful) {
+            errorEl.textContent = result.message || 'Could not add zone.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        document.getElementById('zoneNameInput').value = '';
+        document.getElementById('zoneFeeInput').value = '';
+        await loadZones();
+    });
+
+    loadPoints();
+
+    async function loadPoints() {
+        const result = await VendorAPI.getPickupPoints();
+        const list = document.getElementById('points-list');
+
+        if (!result.isSuccessful) {
+            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${result.message || 'Could not load locations.'}</p>`;
+            return;
+        }
+
+        const points = result.data || [];
+
+        if (points.length === 0) {
+            list.innerHTML = `<p style="font-size:0.82rem;color:var(--dark-muted);">No saved locations yet.</p>`;
+            return;
+        }
+
+        list.innerHTML = points.map(p => `
+            <div class="zone-row">
+                <span><strong>${p.pointName}</strong> - ${p.address}</span>
+                <button class="zone-remove" onclick="removePoint('${p.pointId}')"><i class="bi bi-trash"></i></button>
+            </div>
+        `).join('');
+    }
+
+    window.removePoint = async function(pointId) {
+        if (!confirm('Remove this pickup location?')) return;
+        const result = await VendorAPI.removePickupPoint(pointId);
+        if (result.isSuccessful) {
+            await loadPoints();
+        } else {
+            showToast(result.message || 'Could not remove location.', 'error');
+        }
+    };
+
+    document.getElementById('add-point-btn').addEventListener('click', async () => {
+        const pointName = document.getElementById('pointNameInput').value.trim();
+        const address = document.getElementById('pointAddressInput').value.trim();
+        const errorEl = document.getElementById('point-error');
+        errorEl.style.display = 'none';
+
+        if (!pointName) {
+            errorEl.textContent = 'Please enter a location name.';
+            errorEl.style.display = 'block';
+            return;
+        }
+        if (!address) {
+            errorEl.textContent = 'Please enter an address.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const result = await VendorAPI.addPickupPoint({ pointName, address });
+
+        if (!result.isSuccessful) {
+            errorEl.textContent = result.message || 'Could not add location.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        document.getElementById('pointNameInput').value = '';
+        document.getElementById('pointAddressInput').value = '';
+        await loadPoints();
+    });
+
     function hidePayoutBanners() {
         document.getElementById('payout-error').style.display = 'none';
         document.getElementById('payout-success').style.display = 'none';
@@ -216,7 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const orgName = document.getElementById('orgName').value.trim();
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const address = document.getElementById('addressInput').value.trim();
-        const location = locationPicker ? locationPicker.getLocation() : null;
 
         let hasError = false;
         if (!orgName) {
@@ -233,19 +353,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('addressInput-error').textContent = 'Address is required.';
             hasError = true;
         }
-        if (!location) {
-            document.getElementById('location-error').textContent = 'Please click on the map to pin your location.';
-            hasError = true;
-        }
         if (hasError) return;
 
         setLoading(true);
         hideFormBanners();
 
-        const result = await VendorAPI.updateProfile({
-            organizationName: orgName, phoneNumber, address,
-            latitude: location.lat, longitude: location.lng
-        });
+        const result = await VendorAPI.updateProfile({ organizationName: orgName, phoneNumber, address });
 
         setLoading(false);
 

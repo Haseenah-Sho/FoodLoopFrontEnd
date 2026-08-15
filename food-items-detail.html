@@ -57,6 +57,7 @@
                         <div class="detail-title" id="detail-name"></div>
                         <div class="detail-vendor" id="detail-vendor"></div>
                         <div class="detail-location" id="detail-location"></div>
+                        <div class="detail-safety-info" id="detail-safety-info"></div>
                     </div>
                     <span id="detail-badge"></span>
                 </div>
@@ -82,6 +83,13 @@
                         <div id="fulfillment-options">
                             <p class="fulfillment-label">Fulfilment</p>
                             <div class="fulfillment-btns" id="fulfillment-btns"></div>
+                        </div>
+
+                        <div id="delivery-address-wrap" style="display:none;">
+                            <select id="deliveryZoneSelect" class="order-input" style="margin-bottom:10px;">
+                                <option value="">Select your area</option>
+                            </select>
+                            <input type="text" id="deliveryAddress" class="order-input" placeholder="Enter delivery address">
                         </div>
 
                         <div id="delivery-address-wrap" style="display:none;">

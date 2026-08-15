@@ -34,7 +34,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderOrder(o) {
         document.getElementById('od-orderNo').textContent = o.orderNo;
         document.getElementById('od-date').textContent = formatDate(o.orderedOn);
-        document.getElementById('od-status').innerHTML = statusPill(o.status);
+        document.getElementById('od-status').innerHTML = statusPill(o);
+        document.getElementById('od-timeline').innerHTML = renderStatusTimeline(o);
 
         document.getElementById('od-vendorName').textContent = o.vendorName;
         document.getElementById('od-vendorPhone').innerHTML = o.vendorPhone
@@ -62,6 +63,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('od-total').textContent =
             o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free';
+
+        // Completed orders can report a mismatch; delivery orders awaiting the customer's
+        // confirmation can either confirm receipt or report a problem the same way.
+        const awaitingDeliveryConfirmation =
+            o.fulfilmentType === 'Delivery' && o.status === 'Confirmed' && o.deliveryStatus === 'Delivered';
+
+        if (o.status === 'Completed') {
+            document.getElementById('mismatch-report').style.display = 'block';
+        }
+
+        if (awaitingDeliveryConfirmation) {
+            document.getElementById('confirm-delivery-section').style.display = 'block';
+        }
 
         if (o.canCancel) {
             document.getElementById('od-actions').style.display = 'flex';
@@ -147,16 +161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `<img src="${fullUrl}" alt="${alt}" class="od-item-img" onerror="this.outerHTML='<div class=\\'od-item-img-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`;
     }
 
-    function statusPill(status) {
-        const map = {
-            'Confirmed': 'status-confirmed',
-            'Pending': 'status-pending',
-            'Completed': 'status-completed',
-            'Cancelled': 'status-cancelled'
-        };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
-    }
-
     function setupSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -170,4 +174,64 @@ document.addEventListener('DOMContentLoaded', async () => {
             sidebar.classList.remove('open'); overlay.classList.remove('show');
         });
     }
+
+    document.getElementById('confirm-receipt-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('confirm-receipt-btn');
+        btn.disabled = true;
+        btn.textContent = 'Confirming...';
+
+        const result = await OrderAPI.confirmDelivery(orderId);
+
+        if (!result.isSuccessful) {
+            showToast(result.message || 'Could not confirm receipt.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Yes, I Received This';
+            return;
+        }
+
+        showToast('Thanks for confirming!', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    });
+
+    document.getElementById('deny-receipt-btn').addEventListener('click', () => {
+        document.getElementById('confirm-delivery-section').style.display = 'none';
+        document.getElementById('mismatch-report').style.display = 'block';
+        document.getElementById('mismatch-form').style.display = 'block';
+        document.getElementById('mismatch-btn').style.display = 'none';
+        document.getElementById('mismatchNote').placeholder = "What happened? (e.g. never arrived, wrong address, etc.)";
+        document.getElementById('mismatchNote').focus();
+    });
+
+    document.getElementById('mismatch-btn').addEventListener('click', () => {
+        document.getElementById('mismatch-form').style.display = 'block';
+        document.getElementById('mismatch-btn').style.display = 'none';
+    });
+
+    document.getElementById('mismatch-submit-btn').addEventListener('click', async () => {
+        const note = document.getElementById('mismatchNote').value.trim();
+        const errorEl = document.getElementById('mismatch-error');
+        errorEl.textContent = '';
+
+        if (!note) {
+            errorEl.textContent = 'Please describe what didn\'t match.';
+            return;
+        }
+
+        const btn = document.getElementById('mismatch-submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        const result = await OrderAPI.flagMismatch(orderId, note);
+
+        btn.disabled = false;
+        btn.textContent = 'Submit Report';
+
+        if (!result.isSuccessful) {
+            errorEl.textContent = result.message || 'Could not submit report.';
+            return;
+        }
+
+        document.getElementById('mismatch-form').style.display = 'none';
+        document.getElementById('mismatch-success').style.display = 'block';
+    });
 });

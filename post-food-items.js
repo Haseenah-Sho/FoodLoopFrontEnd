@@ -43,43 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('pickup-window-group').style.display = 'none';
     });
 
-    // ── Toggle: Delivery ──
+    // -- Toggle: Pickup --
     document.getElementById('delivery-yes').addEventListener('click', () => {
         deliveryAvailable = true;
         document.getElementById('delivery-yes').classList.add('active');
         document.getElementById('delivery-no').classList.remove('active');
-        document.getElementById('delivery-fee-group').style.display = 'block';
     });
 
     document.getElementById('delivery-no').addEventListener('click', () => {
         deliveryAvailable = false;
         document.getElementById('delivery-no').classList.add('active');
         document.getElementById('delivery-yes').classList.remove('active');
-        document.getElementById('delivery-fee-group').style.display = 'none';
-    });
-
-    // ── Toggle: Item location ──
-    let useCustomLocation = false;
-    let itemLocationPicker = null;
-
-    document.getElementById('location-vendor').addEventListener('click', () => {
-        useCustomLocation = false;
-        document.getElementById('location-vendor').classList.add('active');
-        document.getElementById('location-custom').classList.remove('active');
-        document.getElementById('custom-location-group').style.display = 'none';
-    });
-
-    document.getElementById('location-custom').addEventListener('click', () => {
-        useCustomLocation = true;
-        document.getElementById('location-custom').classList.add('active');
-        document.getElementById('location-vendor').classList.remove('active');
-        document.getElementById('custom-location-group').style.display = 'block';
-
-        if (!itemLocationPicker) {
-            itemLocationPicker = createLocationPicker('location-map');
-        } else {
-            itemLocationPicker.refresh();
-        }
     });
 
     // ── Image upload ──
@@ -107,6 +81,34 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', () => {
         handleFiles(Array.from(fileInput.files));
     });
+
+    loadSavedLocations();
+
+    async function loadSavedLocations() {
+        const result = await VendorAPI.getPickupPoints();
+
+        if (!result.isSuccessful || !result.data || result.data.length === 0) {
+            return; // no saved locations - the dropdown just stays hidden, nothing changes for this vendor
+        }
+
+        const select = document.getElementById('savedLocationSelect');
+        const points = result.data;
+
+        points.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.address;
+            opt.textContent = `${p.pointName} — ${p.address}`;
+            select.appendChild(opt);
+        });
+
+        document.getElementById('saved-location-group').style.display = 'block';
+
+        select.addEventListener('change', () => {
+            if (select.value) {
+                document.getElementById('itemAddress').value = select.value;
+            }
+        });
+    }
 
     function handleFiles(files) {
         const remaining = 5 - selectedFiles.length;
@@ -146,30 +148,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const price = parseFloat(document.getElementById('price').value) || 0;
         const pickUpStart = document.getElementById('pickUpStart').value;
         const pickUpEnd = document.getElementById('pickUpEnd').value;
-        const deliveryFee = parseFloat(document.getElementById('deliveryFee').value) || 0;
 
         let hasError = false;
 
         if (!foodName) { showDashFieldError('foodName', 'Food name is required.'); hasError = true; }
         if (!foodDescription) { showDashFieldError('foodDescription', 'Description is required.'); hasError = true; }
+        const foodType = document.getElementById('foodType').value;
+        const storageInstruction = document.getElementById('storageInstruction').value;
+        const bestBeforeDate = document.getElementById('bestBeforeDate').value;
+        const allergens = Array.from(document.querySelectorAll('.allergen-check input:checked'))
+            .map(cb => cb.value).join(',');
+        const attestationConfirmed = document.getElementById('attestationCheck').checked;
+
+        if (!foodType) { showDashFieldError('foodType', 'Please select the food type.'); hasError = true; }
+        if (!storageInstruction) { showDashFieldError('storageInstruction', 'Please select a storage/serving instruction.'); hasError = true; }
+        if (!bestBeforeDate) { showDashFieldError('bestBeforeDate', 'Best before date/time is required.'); hasError = true; }
+        if (!attestationConfirmed) {
+            document.getElementById('attestation-error').textContent = 'Please confirm the checkbox above before posting.';
+            hasError = true;
+        }
         if (!quantity || quantity < 1) { showDashFieldError('quantity', 'Quantity must be at least 1.'); hasError = true; }
         if (!quantityPerUnit || quantityPerUnit < 1) { showDashFieldError('quantityPerUnit', 'Servings per portion must be at least 1.'); hasError = true; }
         if (!isFree && (!price || price < 1)) { showDashFieldError('price', 'Please enter a valid price.'); hasError = true; }
         if (pickupAvailable && !pickUpStart) { showDashFieldError('pickUpStart', 'Pickup start time is required.'); hasError = true; }
         if (pickupAvailable && !pickUpEnd) { showDashFieldError('pickUpEnd', 'Pickup end time is required.'); hasError = true; }
         if (selectedFiles.length === 0) { showDashFieldError('images', 'Please upload at least one image.'); hasError = true; }
-        let itemAddress = null;
-        let itemLocation = null;
-        if (useCustomLocation) {
-            itemAddress = document.getElementById('itemAddress').value.trim();
-            itemLocation = itemLocationPicker ? itemLocationPicker.getLocation() : null;
 
-            if (!itemAddress) { showDashFieldError('itemAddress', 'Address is required for a custom location.'); hasError = true; }
-            if (!itemLocation) {
-                document.getElementById('location-error').textContent = 'Please click on the map to pin this item\'s location.';
-                hasError = true;
-            }
-        }
+        const itemAddress = document.getElementById('itemAddress').value.trim();
+        if (!itemAddress) { showDashFieldError('itemAddress', 'Please enter where this food actually is.'); hasError = true; }
         if (!pickupAvailable && !deliveryAvailable) {
             showFormBanner('error', 'At least one option (pickup or delivery) must be selected.');
             hasError = true;
@@ -183,6 +189,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('FoodName', foodName);
         formData.append('FoodDescription', foodDescription);
+        formData.append('FoodType', foodType);
+        formData.append('StorageInstruction', storageInstruction);
+        formData.append('Allergens', allergens);
+        formData.append('BestBeforeDate', new Date(bestBeforeDate).toISOString());
+        formData.append('AttestationConfirmed', attestationConfirmed);
         formData.append('Quantity', quantity);
         formData.append('QuantityPerUnit', quantityPerUnit);
         formData.append('IsFree', isFree);
@@ -191,12 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('DeliveryAvailable', deliveryAvailable);
         formData.append('PickUpStart', pickUpStart ? new Date(pickUpStart).toISOString() : new Date().toISOString());
         formData.append('PickUpEnd', pickUpEnd ? new Date(pickUpEnd).toISOString() : new Date().toISOString());
-        formData.append('DeliveryFee', deliveryAvailable ? deliveryFee : 0);
-        if (useCustomLocation && itemLocation) {
-            formData.append('Address', itemAddress);
-            formData.append('Latitude', itemLocation.lat);
-            formData.append('Longitude', itemLocation.lng);
-        }
+        formData.append('Address', itemAddress);
         selectedFiles.forEach(file => formData.append('Images', file));
 
         const result = await ListingAPI.create(formData);

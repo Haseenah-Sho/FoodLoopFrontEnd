@@ -45,6 +45,13 @@ const VendorAPI = {
     getBanks: () => apiFetch('/vendor/banks'),
     resolveAccount: (accountNumber, bankCode) => apiFetch(`/vendor/resolve-account?accountNumber=${accountNumber}&bankCode=${bankCode}`),
     setBankDetails: (data) => apiFetch('/vendor/bank-details', { method: 'POST', body: JSON.stringify(data) }),
+    getDeliveryZones: () => apiFetch('/vendor/delivery-zones'),
+    addDeliveryZone: (data) => apiFetch('/vendor/delivery-zones', { method: 'POST', body: JSON.stringify(data) }),
+    removeDeliveryZone: (zoneId) => apiFetch(`/vendor/delivery-zones/${zoneId}`, { method: 'DELETE' }),
+    getPickupPoints: () => apiFetch('/vendor/pickup-points'),
+    addPickupPoint: (data) => apiFetch('/vendor/pickup-points', { method: 'POST', body: JSON.stringify(data) }),
+    removePickupPoint: (pointId) => apiFetch(`/vendor/pickup-points/${pointId}`, { method: 'DELETE' }),
+    getPublicDeliveryZones: (vendorId) => apiFetch(`/vendor/${vendorId}/delivery-zones-public`),
 };
 
 // Customer
@@ -80,6 +87,8 @@ const OrderAPI = {
     getMyVendorOrders: () => apiFetch('/order/vendor-orders'),
     cancelOrder: (orderId) => apiFetch(`/order/${orderId}`, { method: 'DELETE' }),
     resumePayment: (orderId) => apiFetch(`/order/${orderId}/resume-payment`, { method: 'POST' }),
+    flagMismatch: (orderId, note) => apiFetch(`/order/${orderId}/flag-mismatch`, { method: 'POST', body: JSON.stringify({ note }) }),
+    confirmDelivery: (orderId) => apiFetch(`/order/${orderId}/confirm-delivery`, { method: 'POST' }),
 };
 
 // Payments
@@ -100,4 +109,6 @@ const AdminAPI = {
     getVendors: () => apiFetch('/admin/vendors'),
     getCustomers: () => apiFetch('/admin/customers'),
     getListings: () => apiFetch('/admin/listings'),
+    getFlaggedOrders: () => apiFetch('/admin/flagged-orders'),
+    notifyVendorOfMismatch: (orderId) => apiFetch(`/admin/flagged-orders/${orderId}/notify-vendor`, { method: 'POST' }),
 };

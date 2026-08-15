@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('togglePassword', 'passwordInput', 'toggleIcon');
     setupToggle('toggleConfirm', 'confirmPasswordInput', 'toggleConfirmIcon');
 
-    const picker = createLocationPicker('location-map');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -25,14 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('emailInput').value.trim();
         const password = document.getElementById('passwordInput').value;
         const confirmPassword = document.getElementById('confirmPasswordInput').value;
-        const location = picker.getLocation();
 
         let hasError = false;
 
         if (!fullName) { showFieldError('fullname-error', document.getElementById('fullNameInput'), 'Full name is required.'); hasError = true; }
         if (!organizationName) { showFieldError('orgname-error', document.getElementById('orgNameInput'), 'Food provider name is required.'); hasError = true; }
         if (!address) { showFieldError('address-error', document.getElementById('addressInput'), 'Address is required.'); hasError = true; }
-        if (!location) { showFieldError('location-error', null, 'Please click on the map to pin your location.'); hasError = true; }
         if (!phoneNumber) { showFieldError('phone-error', document.getElementById('phoneInput'), 'Phone number is required.'); hasError = true; }
         if (!email || !isValidEmail(email)) { showFieldError('email-error', document.getElementById('emailInput'), 'A valid email is required.'); hasError = true; }
         if (!password || password.length < 8) { showFieldError('password-error', document.getElementById('passwordInput'), 'Password must be at least 8 characters.'); hasError = true; }
@@ -44,8 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hideFormMessages();
 
         const result = await VendorAPI.register({
-            fullName, organizationName, phoneNumber, email, password, confirmPassword,
-            address, latitude: location.lat, longitude: location.lng
+            fullName, organizationName, phoneNumber, email, password, confirmPassword, address
         });
 
         setLoading(false);

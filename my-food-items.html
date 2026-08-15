@@ -46,6 +46,19 @@
                 </button>
                 <div class="topbar-title">My Food Items</div>
                 <div class="topbar-right">
+                    <div class="notif-bell-wrap">
+                        <button class="topbar-bell-btn" id="notifBellBtn" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="topbar-badge" id="notifBadge" style="display:none;"></span>
+                        </button>
+                        <div class="notif-dropdown" id="notifDropdown">
+                            <div class="notif-dropdown-head">
+                                <span>Notifications</span>
+                                <button class="notif-mark-read-btn" id="notifMarkReadBtn">Mark all read</button>
+                            </div>
+                            <div id="notifList"><div class="notif-empty">Loading...</div></div>
+                        </div>
+                    </div>
                     <a href="post-food-items.html" class="btn-primary-sm">New Food Items</a>
                 </div>
             </header>
@@ -69,6 +82,8 @@
 
     <script src="utils.js"></script>
     <script src="api.js"></script>
+    <script src="signalr.js"></script>
+    <script src="notif-bell.js"></script>
     <script src="my-food-items.js"></script>
 </body>
 </html>

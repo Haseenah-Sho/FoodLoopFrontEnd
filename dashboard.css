@@ -888,6 +888,20 @@ body {
     line-height: 1.5;
 }
 
+.allergen-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--dark);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    cursor: pointer;
+}
+
 /* Toggle options */
 .toggle-row {
     display: flex;
@@ -1229,4 +1243,96 @@ body {
     background: var(--primary);
     color: var(--white);
     border-color: var(--primary);
+}
+.status-timeline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    margin: 16px 0;
+}
+.status-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+}
+.status-step-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface-alt);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: var(--white);
+    flex-shrink: 0;
+}
+.status-step.done .status-step-dot {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+.status-step.current .status-step-dot {
+    background: var(--white);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,107,60,0.15);
+    position: relative;
+}
+.status-step.current .status-step-dot::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+.status-step-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--dark-muted);
+    text-align: center;
+}
+.status-step.done .status-step-label,
+.status-step.current .status-step-label {
+    color: var(--dark);
+}
+.status-step-line {
+    flex: 1 1 auto;
+    height: 2px;
+    background: var(--border);
+    margin-top: 10px;
+}
+.status-step-line.done {
+    background: var(--primary);
+}
+.status-timeline-cancelled {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    color: #c62828;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    margin: 4px 0 16px;
+}
+.zone-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+}
+.zone-row .zone-remove {
+    background: none;
+    border: none;
+    color: #c62828;
+    cursor: pointer;
+    font-size: 0.9rem;
 }

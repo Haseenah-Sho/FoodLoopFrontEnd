@@ -307,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${listing.vendorName}
                     </div>
 
+                    <div class="listing-card-address">
+                        <i class="bi bi-geo-alt"></i> ${listing.address}
+                    </div>
+
                     <div class="listing-card-fulfillment">
                         ${fulfillmentTags}
                     </div>

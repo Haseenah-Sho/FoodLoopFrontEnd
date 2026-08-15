@@ -283,6 +283,10 @@ body {
     line-height: 1.6;
 }
 
+.detail-safety-info { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.safety-row { font-size: 0.8rem; color: var(--dark-muted); display: flex; align-items: center; gap: 6px; }
+.safety-best-before { color: var(--accent-dark); font-weight: 600; }
+
 /* Meta pills row */
 .detail-meta-row {
     display: flex;

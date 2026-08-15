@@ -29,9 +29,14 @@
     margin-top: 3px;
 }
 
+#od-timeline {
+    margin: 4px 0 16px;
+}
+
 .order-detail-vendor {
     display: flex;
     align-items: center;
+    margin-top: 4px;
     gap: 12px;
     background: var(--surface-alt);
     border-radius: var(--radius-sm);

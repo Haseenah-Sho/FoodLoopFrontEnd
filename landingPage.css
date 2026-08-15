@@ -673,6 +673,15 @@ body {
     gap: 4px;
 }
 
+.listing-card-address {
+    font-size: 0.75rem;
+    color: var(--dark-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+}
+
 .listing-card-footer {
     display: flex;
     justify-content: space-between;

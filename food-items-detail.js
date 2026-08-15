@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedFulfilment = null;
     let selectedStars = 0;
     let quantity = 1;
+    let selectedZoneId = null;
+    let selectedZoneFee = 0;
+    let currentDeliveryZones = [];
 
     await loadListing();
     await loadRatings();
@@ -41,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderListing(l) {
-    document.title = `${l.foodName} — FoodLoop`;
+    document.title = `${l.foodName} - FoodLoop`;
 
     // Show panels
     document.getElementById('detail-loading').style.display = 'none';
@@ -95,23 +98,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('detail-name').textContent = l.foodName;
     document.getElementById('detail-vendor').innerHTML =
         `${l.vendorName}`;
-        // Location + distance (uses the customer's own browser location, if they allow it —
-    // never sent anywhere, just used client-side for this one calculation)
-    const locationEl = document.getElementById('detail-location');
-    const mapUrl = `https://www.openstreetmap.org/?mlat=${l.latitude}&mlon=${l.longitude}#map=16/${l.latitude}/${l.longitude}`;
-    locationEl.innerHTML = `<i class="bi bi-geo-alt"></i> ${l.address} · <a href="${mapUrl}" target="_blank" rel="noopener">View on map</a>`;
+    document.getElementById('detail-location').innerHTML =
+        `<i class="bi bi-geo-alt"></i> ${l.address}`;
+    const foodTypeLabels = {
+        FreshlyCookedMeal: 'Freshly Cooked Meal', BakedGoods: 'Baked Goods',
+        RawProduce: 'Raw Produce', PackagedOrProcessed: 'Packaged / Processed'
+    };
+    const storageLabels = {
+        RoomTemperature: 'Room Temperature', Refrigerated: 'Keep Refrigerated',
+        MustBeReheatedBeforeEating: 'Must Be Reheated Before Eating'
+    };
+    const bestBefore = new Date(l.bestBeforeDate).toLocaleString('en-NG', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
 
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const distanceKm = haversineDistanceKm(
-                pos.coords.latitude, pos.coords.longitude, l.latitude, l.longitude
-            );
-            const distanceText = distanceKm < 1
-                ? `${Math.round(distanceKm * 1000)} m away`
-                : `${distanceKm.toFixed(1)} km away`;
-            locationEl.innerHTML = `<i class="bi bi-geo-alt"></i> ${l.address} · ${distanceText} · <a href="${mapUrl}" target="_blank" rel="noopener">View on map</a>`;
-        }, () => { /* permission denied or unavailable — the address + map link above still shows */ });
-    }
+    document.getElementById('detail-safety-info').innerHTML = `
+        <div class="safety-row"><i class="bi bi-egg-fried"></i> ${foodTypeLabels[l.foodType] || l.foodType}</div>
+        <div class="safety-row"><i class="bi bi-thermometer-half"></i> ${storageLabels[l.storageInstruction] || l.storageInstruction}</div>
+        <div class="safety-row safety-best-before"><i class="bi bi-clock-history"></i> Best before ${bestBefore}</div>
+        ${l.allergens ? `<div class="safety-row"><i class="bi bi-exclamation-triangle"></i> Contains: ${l.allergens}</div>` : ''}
+    `;
 
     // Badge
     const badge = document.getElementById('detail-badge');
@@ -159,16 +165,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 }
 
-    function setupOrderForm(l) {
+    async function setupOrderForm(l) {
         const fulfilmentBtns = document.getElementById('fulfillment-btns');
         const deliveryWrap = document.getElementById('delivery-address-wrap');
+
+        currentDeliveryZones = [];
+        if (l.deliveryAvailable) {
+            const zonesResult = await VendorAPI.getPublicDeliveryZones(l.vendorId);
+            if (zonesResult.isSuccessful && zonesResult.data) {
+                currentDeliveryZones = zonesResult.data;
+            }
+        }
 
         if (l.pickUpAvailable) {
             const btn = createFulfilmentBtn('PickUp', '<i class="bi bi-bag-check"></i> Pickup');
             fulfilmentBtns.appendChild(btn);
         }
 
-        if (l.deliveryAvailable) {
+        if (l.deliveryAvailable && currentDeliveryZones.length > 0) {
             const btn = createFulfilmentBtn('Delivery', '<i class="bi bi-bicycle"></i> Delivery');
             fulfilmentBtns.appendChild(btn);
         }
@@ -177,7 +191,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (firstBtn) {
             firstBtn.classList.add('active');
             selectedFulfilment = firstBtn.dataset.value;
-            if (selectedFulfilment === 'Delivery') deliveryWrap.style.display = 'block';
+            if (selectedFulfilment === 'Delivery') {
+                deliveryWrap.style.display = 'block';
+                populateZoneSelect();
+            }
         }
 
         const qtyInput = document.getElementById('orderQuantity');
@@ -208,6 +225,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateTotal(l);
         document.getElementById('order-btn').addEventListener('click', () => placeOrder(l));
         document.getElementById('add-cart-btn').addEventListener('click', () => addToCart(l));
+    }
+
+    function populateZoneSelect() {
+        const select = document.getElementById('deliveryZoneSelect');
+        select.innerHTML = '<option value="">Select your area</option>' +
+            currentDeliveryZones.map(z =>
+                `<option value="${z.zoneId}" data-fee="${z.fee}">${z.zoneName} - ${formatCurrency(z.fee)}</option>`
+            ).join('');
+
+        select.onchange = () => {
+            const opt = select.selectedOptions[0];
+            selectedZoneId = select.value || null;
+            selectedZoneFee = select.value ? parseFloat(opt.dataset.fee) : 0;
+            updateTotal(listing);
+        };
     }
 
     function addToCart(l) {
@@ -255,8 +287,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('.fulfillment-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             selectedFulfilment = value;
+            selectedZoneId = null;
+            selectedZoneFee = 0;
             const deliveryWrap = document.getElementById('delivery-address-wrap');
             deliveryWrap.style.display = value === 'Delivery' ? 'block' : 'none';
+            if (value === 'Delivery') populateZoneSelect();
             updateTotal(listing);
         });
         return btn;
@@ -265,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateTotal(l) {
         const totalEl = document.getElementById('order-total');
         let base = l.isFree ? 0 : (l.price * quantity);
-        let delivery = (selectedFulfilment === 'Delivery' && l.deliveryAvailable) ? l.deliveryFee : 0;
+        let delivery = (selectedFulfilment === 'Delivery') ? selectedZoneFee : 0;
         let total = base + delivery;
 
         if (total === 0) {
@@ -290,13 +325,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             showOrderError('Please enter your delivery address.');
             return;
         }
+        if (selectedFulfilment === 'Delivery' && !selectedZoneId) {
+            showOrderError('Please select your delivery area.');
+            return;
+        }
 
         setOrderLoading(true);
 
         const payload = {
             items: [{ listingId: listingId, quantity }],
             fulfilmentType: selectedFulfilment === 'PickUp' ? 1 : 2,
-            deliveryAddress: selectedFulfilment === 'Delivery' ? deliveryAddress : null
+            deliveryAddress: selectedFulfilment === 'Delivery' ? deliveryAddress : null,
+            deliveryZoneId: selectedFulfilment === 'Delivery' ? selectedZoneId : null
         };
 
         const result = await OrderAPI.place(payload);

@@ -64,14 +64,12 @@
                                 <div id="notifList"><div class="notif-empty">Loading...</div></div>
                             </div>
                         </div>
-                    
-                </div>
+                    </div>
                     <a href="my-orders.html" class="btn-primary-sm" style="background:transparent;color:var(--dark-muted);border:1.5px solid var(--border);">
                         <i class="bi bi-arrow-left"></i> Back
                     </a>
                 </div>
             </header>
-
             <main class="dashboard-content">
 
                 <!-- Loading -->
@@ -96,6 +94,8 @@
                             </div>
                             <span id="od-status"></span>
                         </div>
+
+                        <div id="od-timeline"></div>
 
                         <div class="order-detail-vendor">
                             <i class="bi bi-shop"></i>
@@ -136,10 +136,37 @@
                             </button>
                         </div>
 
+                        <div id="confirm-delivery-section" style="display:none; margin-top: 16px; padding: 14px; background: #fff3e0; border: 1px solid #ffe0b2; border-radius: var(--radius-sm);">
+                            <p style="font-size: 0.85rem; color: #e65100; font-weight: 600; margin-bottom: 10px;">
+                                The food provider marked this as delivered. Did you receive it?
+                            </p>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" class="btn-primary-sm" id="confirm-receipt-btn">
+                                    <i class="bi bi-check-circle"></i> Yes, I Received This
+                                </button>
+                                <button type="button" class="btn-primary-sm" id="deny-receipt-btn" style="background:transparent; color:#c62828; border:1.5px solid #ffcdd2;">
+                                    <i class="bi bi-x-circle"></i> I Didn't Receive This
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="mismatch-report" style="display:none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                            <button type="button" id="mismatch-btn" style="background:none; border:none; color:#c62828; font-size:0.8rem; font-weight:600; cursor:pointer; padding:0;">
+                                <i class="bi bi-flag"></i> Report an issue with this order
+                            </button>
+                            <div id="mismatch-form" style="display:none; margin-top: 10px;">
+                                <textarea id="mismatchNote" class="dash-input dash-textarea" placeholder="What didn't match the description?" rows="2" style="width:100%;"></textarea>
+                                <div class="dash-field-error" id="mismatch-error"></div>
+                                <button type="button" class="btn-primary-sm" id="mismatch-submit-btn" style="margin-top:8px;">Submit Report</button>
+                            </div>
+                            <div id="mismatch-success" style="display:none; color:#2e7d32; font-size:0.82rem; margin-top:8px;">
+                                <i class="bi bi-check-circle"></i> Thanks - this has been flagged for review.
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>
-
             </main>
         </div>
     </div>
@@ -149,6 +176,7 @@
     <script src="cart.js"></script>
     <script src="signalr.js"></script>
     <script src="notif-bell.js"></script>
+    <script src="order-status.js"></script>
     <script src="order-detail.js"></script>
 </body>
 </html>

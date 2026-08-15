@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="order-card-left">
                             <div class="order-card-no">${o.orderNo}</div>
                             <div class="order-card-items">
-                                ${o.listingNames?.join(', ') || '—'}
+                                ${o.listingNames?.join(', ') || '-'}
                             </div>
                             <div class="order-card-date">${formatDateShort(o.orderedOn)}</div>
                         </div>
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="order-card-amount ${o.totalAmount === 0 ? 'free' : ''}">
                                 ${o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free'}
                             </div>
-                            ${statusPill(o.status)}
+                            ${statusPill(o)}
                             ${o.status === 'Pending' ? `
                                 <button class="btn-primary-sm pay-now-btn"
                                    data-order-id="${o.orderId}"
@@ -98,16 +98,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         window.location.href = result.data.paymentAuthorizationUrl;
-    }
-
-    function statusPill(status) {
-        const map = {
-            'Confirmed': 'status-confirmed',
-            'Pending': 'status-pending',
-            'Completed': 'status-completed',
-            'Cancelled': 'status-cancelled'
-        };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
     }
 
     function formatCurrency(amount) {

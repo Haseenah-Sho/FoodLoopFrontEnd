@@ -54,8 +54,7 @@ const Cart = {
                 maxQty: listing.remainingPortion,
                 imageUrl: listing.imageUrls?.[0] || null,
                 pickUpAvailable: listing.pickUpAvailable,
-                deliveryAvailable: listing.deliveryAvailable,
-                deliveryFee: listing.deliveryFee || 0
+                deliveryAvailable: listing.deliveryAvailable
             });
         }
 

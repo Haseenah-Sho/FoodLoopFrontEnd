@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Providers - FoodLoop Admin</title>
+    <title>Flagged Orders - FoodLoop Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="dashboard.css">
 </head>
@@ -27,10 +27,10 @@
             </div>
             <nav class="sidebar-nav">
                 <a href="admin-dashboard.html" class="sidebar-link">Dashboard</a>
-                <a href="admin-vendors.html" class="sidebar-link active">Food Providers</a>
+                <a href="admin-vendors.html" class="sidebar-link">Food Providers</a>
                 <a href="admin-customers.html" class="sidebar-link">Customers</a>
                 <a href="admin-listings.html" class="sidebar-link">Food Items</a>
-                <a href="admin-flagged-orders.html" class="sidebar-link">Flagged Orders</a>
+                <a href="admin-flagged-orders.html" class="sidebar-link active">Flagged Orders</a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-logout" onclick="Auth.logout()">Logout</button>
@@ -44,29 +44,24 @@
                 <button class="topbar-toggle" id="sidebarToggle">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="topbar-title">Food Providers</div>
+                <div class="topbar-title">Flagged Orders</div>
             </header>
 
             <main class="dashboard-content">
-
-                <div class="filter-tabs">
-                    <button class="filter-tab active" data-filter="all">All</button>
-                    <button class="filter-tab" data-filter="approved">Approved</button>
-                    <button class="filter-tab" data-filter="pending">Pending</button>
-                </div>
-
                 <div class="section">
-                    <div id="vendors-container">
-                        
+                    <div class="section-top">
+                        <h2>Flagged Orders - Description Mismatches</h2>
+                    </div>
+                    <div id="flagged-container">
+                        <div class="empty-state"><p>Loading...</p></div>
                     </div>
                 </div>
-
             </main>
         </div>
     </div>
 
     <script src="utils.js"></script>
     <script src="api.js"></script>
-    <script src="admin-vendors.js"></script>
+    <script src="admin-flagged-orders.js"></script>
 </body>
 </html>

@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupBackLink();
 
     let selectedFulfilment = null;
+    let selectedZoneId = null;
+    let selectedZoneFee = 0;
+    let deliveryZones = [];
 
     render();
 
@@ -94,9 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fulfilment must be supported by every item in the cart (intersection)
-    function renderFulfilmentOptions(cart) {
+    async function renderFulfilmentOptions(cart) {
         const canPickup = cart.items.every(i => i.pickUpAvailable);
-        const canDeliver = cart.items.every(i => i.deliveryAvailable);
+        let canDeliver = cart.items.every(i => i.deliveryAvailable);
+
+        if (canDeliver) {
+            const zonesResult = await VendorAPI.getPublicDeliveryZones(cart.vendorId);
+            deliveryZones = (zonesResult.isSuccessful && zonesResult.data) ? zonesResult.data : [];
+            canDeliver = deliveryZones.length > 0;
+        } else {
+            deliveryZones = [];
+        }
 
         const btnsEl = document.getElementById('fulfillment-btns');
         const conflictEl = document.getElementById('fulfilment-conflict');
@@ -125,9 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('delivery-address-wrap').style.display =
             selectedFulfilment === 'Delivery' ? 'block' : 'none';
 
+        if (selectedFulfilment === 'Delivery') populateZoneSelect();
+
         btnsEl.querySelectorAll('.fulfillment-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 selectedFulfilment = btn.dataset.value;
+                selectedZoneId = null;
+                selectedZoneFee = 0;
                 const cart = Cart.get();
                 renderFulfilmentOptions(cart);
                 updateSummary(cart);
@@ -135,11 +150,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function populateZoneSelect() {
+        const select = document.getElementById('checkoutZoneSelect');
+        select.innerHTML = '<option value="">Select your area</option>' +
+            deliveryZones.map(z =>
+                `<option value="${z.zoneId}" data-fee="${z.fee}">${z.zoneName} — ${formatCurrency(z.fee)}</option>`
+            ).join('');
+
+        select.onchange = () => {
+            const opt = select.selectedOptions[0];
+            selectedZoneId = select.value || null;
+            selectedZoneFee = select.value ? parseFloat(opt.dataset.fee) : 0;
+            updateSummary(Cart.get());
+        };
+    }
+
     function updateSummary(cart) {
         const subtotal = cart.items.reduce((sum, i) => sum + (i.isFree ? 0 : (i.price || 0) * i.quantity), 0);
-        const deliveryFee = selectedFulfilment === 'Delivery'
-            ? cart.items.reduce((sum, i) => sum + (i.deliveryFee || 0), 0)
-            : 0;
+        const deliveryFee = selectedFulfilment === 'Delivery' ? selectedZoneFee : 0;
         const total = subtotal + deliveryFee;
 
         document.getElementById('checkout-subtotal').textContent = subtotal > 0 ? formatCurrency(subtotal) : 'Free';
@@ -171,6 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showCheckoutError('Please enter your delivery address.');
             return;
         }
+        if (selectedFulfilment === 'Delivery' && !selectedZoneId) {
+            showCheckoutError('Please select your delivery area.');
+            return;
+        }
 
         if (!Auth.isLoggedIn() || !Auth.hasRole('app_customer')) {
             window.location.href = `login.html?returnUrl=${encodeURIComponent(window.location.href)}`;
@@ -182,7 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             items: cart.items.map(i => ({ listingId: i.listingId, quantity: i.quantity })),
             fulfilmentType: selectedFulfilment === 'PickUp' ? 1 : 2,
-            deliveryAddress: selectedFulfilment === 'Delivery' ? deliveryAddress : null
+            deliveryAddress: selectedFulfilment === 'Delivery' ? deliveryAddress : null,
+            deliveryZoneId: selectedFulfilment === 'Delivery' ? selectedZoneId : null
         };
 
         const result = await OrderAPI.place(payload);
