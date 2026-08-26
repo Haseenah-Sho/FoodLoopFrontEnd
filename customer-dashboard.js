@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // Auth guard
     if (!requireAuth(['app_customer'])) return;
 
     // Populate user info
@@ -50,8 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const orders = result.data || [];
 
-        // Stats — cancelled orders don't count toward the total; food items only count once actually rescued (Completed)
-        const countedOrders = orders.filter(o => o.status !== 'Cancelled');
+        // Stats - cancelled orders don't count toward the total; food items only count once actually rescued (Completed)
+        const countedOrders = orders.filter(o => o.status === 'Completed');
         const foodItemsRescued = orders
             .filter(o => o.status === 'Completed')
             .reduce((sum, o) => sum + (o.listingNames?.length || 0), 0);

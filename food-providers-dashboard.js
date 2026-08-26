@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     overlay.addEventListener('click', closeSidebar);
 
     // Check approval status from login response
-    const vendorApproved = user.vendorApproved;
-    if (vendorApproved === false) {
+    const profileResult = await VendorAPI.getProfile();
+    if (profileResult.isSuccessful && profileResult.data.isApproved === false) {
         document.getElementById('approval-banner').style.display = 'flex';
         document.getElementById('post-food-items-btn').style.pointerEvents = 'none';
         document.getElementById('post-food-items-btn').style.opacity = '0.5';
@@ -58,11 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const recent = listings.slice(0, 5);
     const container = document.getElementById('recent-listings');
 
-    if (recent.length === 0) {
+        if (recent.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
-                
-                <p>${vendor?.isApproved === false
+                <p>${profileResult.isSuccessful && profileResult.data.isApproved === false
                     ? 'Your account needs admin approval before you can post food items.'
                     : 'No food items yet. <a href="post-food-items.html">Post your first food item</a>.'
                 }</p>

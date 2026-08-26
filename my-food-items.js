@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     async function loadListings() {
-        const result = await ListingAPI.getAll();
+    const result = await ListingAPI.getVendorListings();
 
         if (!result.isSuccessful) {
             document.getElementById('listings-grid').innerHTML =

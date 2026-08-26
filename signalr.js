@@ -1,6 +1,3 @@
-// SignalR client — handles real-time notifications and live updates
-
-// Load SignalR client library dynamically
 const signalRScript = document.createElement('script');
 signalRScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js';
 document.head.appendChild(signalRScript);
@@ -11,7 +8,7 @@ signalRScript.onload = () => {
 
 function initSignalR() {
     const token = Auth.getToken();
-    if (!token) return; // Don't connect if not logged in
+    if (!token) return;
 
     const connection = new signalR.HubConnectionBuilder()
         .withUrl('https://localhost:7208/hubs/notifications', {
@@ -68,7 +65,7 @@ function initSignalR() {
 
     // ── Event handlers ──
 
-    // Stock changed — update listing card/detail live
+    // Stock changed - update listing card/detail live
     connection.on('ListingStockChanged', (data) => {
         console.log('Stock changed:', data);
 
@@ -113,17 +110,17 @@ function initSignalR() {
         }
     });
 
-    // New Food Items posted — add card to browse grid live
+    // New Food Items posted - add card to browse grid live
     connection.on('NewListingPosted', (data) => {
-        console.log('New Food Items:', data);
+    console.log('New Food Items:', data);
 
-        const grid = document.getElementById('listings-grid');
-        if (!grid) return;
+    showToast(`New Food Items available: ${data.foodName}`, 'success');
 
-        showToast(`New Food Items available: ${data.foodName}`, 'success');
+    const grid = document.getElementById('listings-grid');
+    if (!grid) return;
 
-        // Add new card to top of grid
-        const newCard = document.createElement('div');
+    // Add new card to top of grid
+    const newCard = document.createElement('div');
         newCard.className = 'listing-card';
         newCard.dataset.id = data.listingId;
         newCard.innerHTML = `
@@ -178,7 +175,7 @@ function initSignalR() {
         }
     });
 
-    // New order received — notify vendor
+    // New order received - notify vendor
     connection.on('NewOrderReceived', (data) => {
         console.log('New order received:', data);
 
