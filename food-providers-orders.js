@@ -76,10 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <a href="tel:${o.customerPhoneNumber}" class="btn-primary-sm" style="background:var(--accent);border-color:var(--accent);">
                         <i class="bi bi-telephone-fill"></i> Call Customer
                     </a>` : ''}
-                ${o.status === 'Confirmed' && o.fulfilmentType === 'PickUp' ? `
-                    <button class="btn-primary-sm" onclick="verifyPickup('${o.orderNo}')">
-                        <i class="bi bi-check-circle"></i> Mark as Picked Up
-                    </button>` : ''}
+               
                 ${o.status === 'Confirmed' && o.fulfilmentType === 'PickUp' ? `
                     <button class="btn-primary-sm" onclick="verifyPickup('${o.orderNo}')">
                         <i class="bi bi-check-circle"></i> Mark as Picked Up
