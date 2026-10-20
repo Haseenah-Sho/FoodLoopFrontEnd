@@ -89,7 +89,7 @@ const Cart = {
         const item = cart.items.find(i => i.listingId === listingId);
         if (!item) return null;
 
-        if (remainingPortion <= 0 || status === 'Expired' || status === 'Completed') {
+        if (remainingPortion <= 0 || ['Expired', 'Completed', 'Withdrawn'].includes(status)) {
             cart.items = cart.items.filter(i => i.listingId !== listingId);
             if (cart.items.length === 0) Cart.clear(); else Cart.save(cart);
             return { removed: true, foodName: item.foodName };

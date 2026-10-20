@@ -8,6 +8,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupToggle('togglePassword', 'passwordInput', 'toggleIcon');
     setupToggle('toggleConfirm', 'confirmPasswordInput', 'toggleConfirmIcon');
 
+    const prefillEmail = new URLSearchParams(window.location.search).get('email');
+    if (prefillEmail) document.getElementById('emailInput').value = prefillEmail;
+
+    const FIELD_ERRORS = {
+    emailInput: 'email-error',
+    tokenInput: 'token-error',
+    passwordInput: 'password-error',
+    confirmPasswordInput: 'confirm-error'
+        };
+
+        Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) => {
+            const input = document.getElementById(inputId);
+            if (input) input.addEventListener('input', () => clearFieldError(errorId, input));
+        });
+
+        function clearAllErrors() {
+            Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) =>
+                clearFieldError(errorId, document.getElementById(inputId)));
+        }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -16,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newPassword = document.getElementById('passwordInput').value;
         const confirmPassword = document.getElementById('confirmPasswordInput').value;
 
+        clearAllErrors();
         let hasError = false;
 
         if (!email || !isValidEmail(email)) { showFieldError('email-error', document.getElementById('emailInput'), 'A valid email is required.'); hasError = true; }

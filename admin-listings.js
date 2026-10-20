@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${listings.map(l => `
                         <tr>
-                            <td class="food-name">${l.foodName}</td>
-                            <td>${l.vendorName}</td>
+                            <td class="food-name">${escapeHtml(l.foodName)}</td>
+                            <td>${escapeHtml(l.vendorName)}</td>
                             <td>${l.isFree ? '<span class="status-pill status-confirmed">Free</span>' : formatCurrency(l.price)}</td>
                             <td>${l.quantity}</td>
                             <td>${l.remainingPortion} left</td>
@@ -73,13 +73,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function listingStatusPill(status) {
-        const map = {
-            'Active': 'status-confirmed',
-            'Completed': 'status-completed',
-            'Expired': 'status-cancelled'
-        };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
-    }
+    const map = {
+        'Active': 'status-confirmed',
+        'Completed': 'status-completed',
+        'Expired': 'status-cancelled',
+        'Withdrawn': 'status-withdrawn'
+    };
+    return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status)}</span>`;
+}
 
     function formatCurrency(amount) {
         return '₦' + Number(amount).toLocaleString('en-NG');

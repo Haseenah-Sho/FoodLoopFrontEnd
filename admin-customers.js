@@ -42,10 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${customers.map(c => `
                         <tr>
-                            <td class="food-name">${c.name}</td>
-                            <td>${c.email}</td>
-                            <td>${c.phoneNumber}</td>
-                            <td>${c.address || '-'}</td>
+                            <td class="food-name">${escapeHtml(c.name)}</td>
+                            <td>${escapeHtml(c.email)}</td>
+                            <td>${escapeHtml(c.phoneNumber)}</td>
+                            <td>${escapeHtml(c.address || '-')}</td>
                             <td>${c.totalOrders}</td>
                             <td>${formatDateShort(c.dateJoined)}</td>
                         </tr>

@@ -1,0 +1,71 @@
+.disclaimer-bar {
+    background: #fff4dc;
+    color: #5c3d00;
+    border-bottom: 1px solid #f0d9a8;
+    padding: 7px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.disclaimer-bar i {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+}
+
+.disclaimer-bar a {
+    color: #5c3d00;
+    font-weight: 700;
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
+.disclaimer-bar a:hover {
+    color: #000;
+}
+
+@media (max-width: 480px) {
+    .disclaimer-bar {
+        font-size: 0.7rem;
+        padding: 6px 12px;
+        text-align: left;
+    }
+}
+
+.disclaimer-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 10px 12px;
+    background: #fff4dc;
+    border: 1px solid #f0d9a8;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #5c3d00;
+}
+
+.disclaimer-note i {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 0.9rem;
+}
+
+.disclaimer-note a {
+    color: #5c3d00;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.order-form .disclaimer-note,
+.checkout-summary-card .disclaimer-note {
+    margin: 0;
+}

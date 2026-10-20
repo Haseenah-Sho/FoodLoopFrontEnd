@@ -1,11 +1,26 @@
+function safeReturnUrl(url) {
+    if (!url) return null;
+    try {
+        const u = new URL(url, window.location.href);
+        return u.origin === window.location.origin ? u.href : null;
+    } catch {
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
+    const returnUrl = safeReturnUrl(new URLSearchParams(window.location.search).get('returnUrl'));
 
-    
     if (Auth.isLoggedIn()) {
         redirectToDashboard(Auth.getUser().roles || []);
         return;
+    }
+
+    if (returnUrl) {
+        document.querySelectorAll('a[href^="register-customer.html"]').forEach(a => {
+            a.href = `register-customer.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+        });
     }
 
     const form = document.getElementById('login-form');
@@ -18,25 +33,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const togglePassword = document.getElementById('togglePassword');
     const toggleIcon = document.getElementById('toggleIcon');
 
-    //  Toggle password visibility 
-    togglePassword.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleIcon.className = 'bi bi-eye-slash';
-    } else {
-        passwordInput.type = 'password';
-        toggleIcon.className = 'bi bi-eye';
-    }
-}); 
+    // Toggle password visibility
+    togglePassword.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-    //  Clear errors on input 
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.className = 'bi bi-eye-slash';
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.className = 'bi bi-eye';
+        }
+    });
+
+    // Clear errors on input
     emailInput.addEventListener('input', () => clearFieldError('email-error', emailInput));
     passwordInput.addEventListener('input', () => clearFieldError('password-error', passwordInput));
 
-    //  Form submit 
+    // Form submit
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -69,19 +84,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!result.isSuccessful) {
             showFormError(result.message || 'Login failed. Please try again.');
+
+            // Unverified account: take them to verification, keeping the item they came from
+            if (/not been verified/i.test(result.message || '')) {
+                const verifyUrl = `verify-email.html?email=${encodeURIComponent(email)}`
+                    + (returnUrl ? `&returnUrl=${encodeURIComponent(returnUrl)}` : '');
+                setTimeout(() => window.location.href = verifyUrl, 2500);
+            }
             return;
         }
 
         Auth.setToken(result.data.token);
         Auth.setUser(result.data);
 
-
         showToast('Login successful!', 'success');
 
         setTimeout(() => redirectToDashboard(result.data.roles || []), 1200);
     });
 
-    //  Helpers 
+    // Helpers
 
     function setLoading(loading) {
         loginBtn.disabled = loading;

@@ -9,10 +9,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnText = document.getElementById('btn-text');
     const btnSpinner = document.getElementById('btn-spinner');
     const registerBtn = document.getElementById('register-btn');
+    const disclaimerCheck = document.getElementById('disclaimerCheck');
+    const consentGroup = document.getElementById('consent-group');
+    const disclaimerError = document.getElementById('disclaimer-error');
 
     setupToggle('togglePassword', 'passwordInput', 'toggleIcon');
     setupToggle('toggleConfirm', 'confirmPasswordInput', 'toggleConfirmIcon');
 
+        disclaimerCheck.addEventListener('change', () => {
+        disclaimerError.textContent = '';
+        consentGroup.classList.remove('is-invalid');
+    });
+
+        const FIELD_ERRORS = {
+        fullNameInput: 'fullname-error',
+        orgNameInput: 'orgname-error',
+        addressInput: 'address-error',
+        phoneInput: 'phone-error',
+        emailInput: 'email-error',
+        passwordInput: 'password-error',
+        confirmPasswordInput: 'confirm-error'
+    };
+
+    Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) => {
+        const input = document.getElementById(inputId);
+        if (input) input.addEventListener('input', () => clearFieldError(errorId, input));
+    });
+
+    function clearAllErrors() {
+        Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) =>
+            clearFieldError(errorId, document.getElementById(inputId)));
+        disclaimerError.textContent = '';
+        consentGroup.classList.remove('is-invalid');
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -25,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('passwordInput').value;
         const confirmPassword = document.getElementById('confirmPasswordInput').value;
 
+        clearAllErrors();
         let hasError = false;
 
         if (!fullName) { showFieldError('fullname-error', document.getElementById('fullNameInput'), 'Full name is required.'); hasError = true; }
@@ -34,6 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!email || !isValidEmail(email)) { showFieldError('email-error', document.getElementById('emailInput'), 'A valid email is required.'); hasError = true; }
         if (!password || password.length < 8) { showFieldError('password-error', document.getElementById('passwordInput'), 'Password must be at least 8 characters.'); hasError = true; }
         if (password !== confirmPassword) { showFieldError('confirm-error', document.getElementById('confirmPasswordInput'), 'Passwords do not match.'); hasError = true; }
+        if (!disclaimerCheck.checked) {
+            disclaimerError.textContent = 'Please accept the disclaimer to register.';
+            consentGroup.classList.add('is-invalid');
+            hasError = true;
+        }
 
         if (hasError) return;
 
@@ -41,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hideFormMessages();
 
         const result = await VendorAPI.register({
-            fullName, organizationName, phoneNumber, email, password, confirmPassword, address
+            fullName, organizationName, phoneNumber, email, password, confirmPassword, address,
+            acceptedDisclaimer: disclaimerCheck.checked
         });
 
         setLoading(false);
@@ -52,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showToast('Registration submitted! Check your email to verify your account. Admin approval is required before you can list food.', 'success');
-        setTimeout(() => window.location.href = 'verify-email.html', 3000);
+        setTimeout(() => window.location.href = `verify-email.html?email=${encodeURIComponent(email)}`, 3000);
     });
 
     function setLoading(loading) {

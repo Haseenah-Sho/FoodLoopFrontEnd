@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('flagged-container');
 
         if (!result.isSuccessful) {
-            container.innerHTML = `<div class="empty-state"><p>${result.message || 'Could not load flagged orders.'}</p></div>`;
+            container.innerHTML = `<div class="empty-state"><p>${escapeHtml(result.message || 'Could not load flagged orders.')}</p></div>`;
             return;
         }
 
@@ -56,10 +56,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${orders.map(o => `
                         <tr>
-                            <td class="food-name">${o.orderNo}</td>
-                            <td>${o.vendorName}</td>
-                            <td>${o.customerName}</td>
-                            <td>${o.note}</td>
+                            <td class="food-name">${escapeHtml(o.orderNo)}</td>
+                            <td>${escapeHtml(o.vendorName)}</td>
+                            <td>${escapeHtml(o.customerName)}</td>
+                            <td>${escapeHtml(o.note)}</td>
                             <td>${formatDateShort(o.flaggedAt)}</td>
                             <td>${o.vendorNotified
                                 ? `<span class="status-pill status-confirmed">Notified</span>`

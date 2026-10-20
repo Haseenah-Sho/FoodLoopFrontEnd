@@ -54,6 +54,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const listings = result.data || [];
     const active = listings.filter(l => l.status === 'Active');
     document.getElementById('stat-listings').textContent = active.length;
+    const drafts = listings.filter(l => l.status === 'Draft');
+    if (drafts.length > 0) {
+        document.getElementById('draft-banner-text').innerHTML =
+            `You have <strong>${drafts.length}</strong> draft${drafts.length > 1 ? 's' : ''} that customers can't see yet. ` +
+            `<a href="my-food-items.html">Review and publish</a>`;
+        document.getElementById('draft-banner').style.display = 'flex';
+    }
 
     const recent = listings.slice(0, 5);
     const container = document.getElementById('recent-listings');
@@ -82,7 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <tbody>
                 ${recent.map(l => `
                     <tr>
-                        <td class="food-name">${l.foodName}</td>
+                        <td class="food-name">${escapeHtml(l.foodName)}</td>
                         <td>${l.isFree ? 'Free' : formatCurrency(l.price)}</td>
                         <td>${l.remainingPortion}</td>
                         <td>${listingStatusPill(l.status)}</td>
@@ -131,8 +138,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${recent.map(o => `
                         <tr>
-                            <td class="food-name">${o.orderNo}</td>
-                            <td>${o.customerName || '-'}</td>
+                            <td class="food-name">${escapeHtml(o.orderNo)}</td>
+                            <td>${escapeHtml(o.customerName || '-')}</td>
                             <td>${o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free'}</td>
                             <td>${statusPill(o.status)}</td>
                             <td>${formatDateShort(o.orderedOn)}</td>
@@ -150,16 +157,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Completed': 'status-completed',
             'Cancelled': 'status-cancelled'
         };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
+        return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status)}</span>`;
     }
 
     function listingStatusPill(status) {
         const map = {
+            'Draft': 'status-draft',
             'Active': 'status-confirmed',
             'Completed': 'status-completed',
-            'Expired': 'status-cancelled'
+            'Expired': 'status-cancelled',
+            'Withdrawn': 'status-withdrawn'
         };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status || 'Active'}</span>`;
+        return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status || 'Active')}</span>`;
     }
 
     function formatCurrency(amount) {

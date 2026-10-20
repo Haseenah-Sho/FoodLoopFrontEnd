@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let allOrders = [];
     let activeFilter = 'all';
+    let actionBusy = false;
 
     await loadOrders();
 
@@ -45,51 +46,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         if (!result.isSuccessful) {
-            content.innerHTML = `<p style="color:#c62828;font-size:0.875rem;">${result.message}</p>`;
+            content.innerHTML = `<p style="color:#c62828;font-size:0.875rem;">${escapeHtml(result.message || 'Order not found.')}</p>`;
             return;
         }
 
         const o = result.data;
+        const canDispatch = o.status === 'Confirmed'
+            && o.fulfilmentType === 'Delivery'
+            && (!o.deliveryStatus || o.deliveryStatus === 'Pending');
+
         content.innerHTML = `
             <div style="display:flex;flex-direction:column;gap:12px;">
                 <div style="display:flex;gap:24px;flex-wrap:wrap;">
                     <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Order No</div>
-                    <div style="font-weight:700;">${o.orderNo}</div></div>
+                    <div style="font-weight:700;">${escapeHtml(o.orderNo)}</div></div>
                     <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Customer</div>
-                    <div style="font-weight:700;">${o.customerName}</div></div>
+                    <div style="font-weight:700;">${escapeHtml(o.customerName)}</div></div>
                     <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Phone</div>
-                    <div style="font-weight:700;">${o.customerPhoneNumber || '-'}</div></div>
+                    <div style="font-weight:700;">${escapeHtml(o.customerPhoneNumber || '-')}</div></div>
                     <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Fulfilment</div>
-                    <div style="font-weight:700;">${o.fulfilmentType}</div></div>
-                    <div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Status</div>
+                    <div style="font-weight:700;">${escapeHtml(o.fulfilmentType)}</div></div>
+                    <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Status</div>
                     <div>${statusPill(o)}</div></div>
+                    ${o.fulfilmentType === 'Delivery' && o.deliveryAddress ? `
+                    <div><div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;">Deliver To</div>
+                    <div style="font-weight:700;">${escapeHtml(o.deliveryAddress)}${o.deliveryZoneName ? ' (' + escapeHtml(o.deliveryZoneName) + ')' : ''}</div></div>` : ''}
                 </div>
+
                 <div>
                     <div style="font-size:0.75rem;color:var(--dark-muted);font-weight:600;text-transform:uppercase;margin-bottom:8px;">Items</div>
                     ${o.items.map(i => `
                         <div style="font-size:0.875rem;padding:6px 0;border-bottom:1px solid var(--border);">
-                            ${i.foodName} × ${i.quantity}
+                            ${escapeHtml(i.foodName)} × ${i.quantity}
                         </div>`).join('')}
                 </div>
 
-                ${o.customerPhoneNumber ? `
-                    <a href="tel:${o.customerPhoneNumber}" class="btn-primary-sm" style="background:var(--accent);border-color:var(--accent);">
-                        <i class="bi bi-telephone-fill"></i> Call Customer
-                    </a>` : ''}
-               
-                ${o.status === 'Confirmed' && o.fulfilmentType === 'PickUp' ? `
-                    <button class="btn-primary-sm" onclick="verifyPickup('${o.orderNo}')">
-                        <i class="bi bi-check-circle"></i> Mark as Picked Up
-                    </button>` : ''}
-                ${o.status === 'Confirmed' && o.fulfilmentType === 'Delivery' ? `
-                    <button class="btn-primary-sm" onclick="dispatchDelivery('${o.orderNo}')">
-                        <i class="bi bi-bicycle"></i> Mark as Dispatched
-                    </button>` : ''}
-                ${o.deliveryStatus === 'Dispatched' ? `
-                    <button class="btn-primary-sm" onclick="markDelivered('${o.orderNo}')">
-                        <i class="bi bi-patch-check"></i> Mark as Delivered
-                    </button>
-                ` : ''}
+                ${o.status === 'Pending' ? `
+                    <div style="font-size:0.82rem;color:#b26a00;background:#fff3e0;border:1px solid #ffe0b2;border-radius:8px;padding:10px 12px;">
+                        Waiting for the customer's payment. You can't mark this order as picked up or dispatched yet.
+                    </div>` : ''}
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    ${o.customerPhoneNumber ? `
+                        <a href="tel:${escapeHtml(o.customerPhoneNumber)}" class="btn-primary-sm" style="background:var(--accent);border-color:var(--accent);">
+                            <i class="bi bi-telephone-fill"></i> Call Customer
+                        </a>` : ''}
+                    ${o.status === 'Confirmed' && o.fulfilmentType === 'PickUp' ? `
+                        <button class="btn-primary-sm" onclick="verifyPickup('${escapeHtml(o.orderNo)}')">
+                            <i class="bi bi-check-circle"></i> Picked Up
+                        </button>` : ''}
+                    ${canDispatch ? `
+                        <button class="btn-primary-sm" onclick="dispatchDelivery('${escapeHtml(o.orderNo)}')">
+                            <i class="bi bi-bicycle"></i> Dispatched
+                        </button>` : ''}
+                    ${o.deliveryStatus === 'Dispatched' ? `
+                        <button class="btn-primary-sm" onclick="markDelivered('${escapeHtml(o.orderNo)}')">
+                            <i class="bi bi-patch-check"></i> Delivered
+                        </button>` : ''}
+                </div>
             </div>`;
     }
 
@@ -98,18 +112,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('orderNoInput').value = '';
     };
 
-    window.verifyPickup = async function(orderNo) {
+    // Ignore a click while another action is still running
+    async function runAction(fn) {
+        if (actionBusy) return;
+        actionBusy = true;
+        try {
+            await fn();
+        } finally {
+            actionBusy = false;
+        }
+    }
+
+    window.verifyPickup = (orderNo) => runAction(async () => {
         const result = await OrderAPI.verifyPickup(orderNo);
         if (result.isSuccessful) {
-            showToast('Order as been picked up.', 'success');
+            showToast('Order marked as picked up.', 'success');
             window.closeLookup();
             await loadOrders();
         } else {
             showToast(result.message || 'Failed to verify pickup.', 'error');
         }
-    };
+    });
 
-    window.dispatchDelivery = async function(orderNo) {
+    window.dispatchDelivery = (orderNo) => runAction(async () => {
         const result = await OrderAPI.dispatchDelivery(orderNo);
         if (result.isSuccessful) {
             showToast('Order dispatched.', 'success');
@@ -118,18 +143,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             showToast(result.message || 'Failed to dispatch.', 'error');
         }
-    };
+    });
 
-    window.markDelivered = async function(orderNo) {
+    window.markDelivered = (orderNo) => runAction(async () => {
         const result = await OrderAPI.markDelivered(orderNo);
         if (result.isSuccessful) {
-            showToast('Order has been delivered.', 'success');
+            showToast('Order marked as delivered.', 'success');
             window.closeLookup();
             await loadOrders();
         } else {
-            showToast(result.message || 'Failed to be delivered.', 'error');
+            showToast(result.message || 'Failed to mark as delivered.', 'error');
         }
-    };
+    });
 
     async function loadOrders() {
         const result = await OrderAPI.getMyVendorOrders();
@@ -139,7 +164,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         allOrders = result.data || [];
-        renderOrders(allOrders);
+        renderOrders(activeFilter === 'all'
+            ? allOrders
+            : allOrders.filter(o => o.status === activeFilter));
     }
 
     function renderOrders(orders) {
@@ -169,11 +196,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </thead>
                 <tbody>
                     ${orders.map(o => `
-                        <tr class="order-row" data-order-no="${o.orderNo}" style="cursor:pointer;">
-                            <td class="food-name">${o.orderNo}</td>
-                            <td>${o.customerName || '-'}</td>
+                        <tr class="order-row" data-order-no="${escapeHtml(o.orderNo)}" style="cursor:pointer;">
+                            <td class="food-name">${escapeHtml(o.orderNo)}</td>
+                            <td>${escapeHtml(o.customerName || '-')}</td>
                             <td>${o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free'}</td>
-                            <td>${o.fulfilmentType}</td>
+                            <td>${escapeHtml(o.fulfilmentType)}</td>
                             <td>${statusPill(o)}</td>
                             <td>${formatDateShort(o.orderedOn)}</td>
                             <td onclick="event.stopPropagation()">${callButton(o)}</td>
@@ -188,22 +215,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Only paid, live orders get a Call button
     function callButton(o) {
-        if (!o.customerPhoneNumber) return '-';
-        return `<a href="tel:${o.customerPhoneNumber}" class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;background:var(--accent);border-color:var(--accent);">
+        if (o.status !== 'Confirmed' || !o.customerPhoneNumber) return '-';
+        return `<a href="tel:${escapeHtml(o.customerPhoneNumber)}" class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;background:var(--accent);border-color:var(--accent);">
             <i class="bi bi-telephone-fill"></i> Call
         </a>`;
     }
 
     function actionButton(o) {
         if (o.status === 'Confirmed' && o.fulfilmentType === 'PickUp') {
-            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="verifyPickup('${o.orderNo}')">Mark Picked Up</button>`;
+            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="verifyPickup('${escapeHtml(o.orderNo)}')">Picked Up</button>`;
         }
-        if (o.status === 'Confirmed' && o.fulfilmentType === 'Delivery' && !o.deliveryStatus) {
-            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="dispatchDelivery('${o.orderNo}')">Mark Dispatched</button>`;
+        if (o.status === 'Confirmed' && o.fulfilmentType === 'Delivery' && (!o.deliveryStatus || o.deliveryStatus === 'Pending')) {
+            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="dispatchDelivery('${escapeHtml(o.orderNo)}')">Dispatched</button>`;
         }
         if (o.deliveryStatus === 'Dispatched') {
-            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="markDelivered('${o.orderNo}')">Mark Delivered</button>`;
+            return `<button class="btn-primary-sm" style="font-size:0.75rem;padding:5px 10px;" onclick="markDelivered('${escapeHtml(o.orderNo)}')">Delivered</button>`;
         }
         return '-';
     }
@@ -215,9 +243,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Completed': 'status-completed',
             'Cancelled': 'status-cancelled'
         };
-        let html = `<span class="status-pill ${map[o.status] || 'status-pending'}">${o.status}</span>`;
+        let html = `<span class="status-pill ${map[o.status] || 'status-pending'}">${escapeHtml(o.status)}</span>`;
         if (o.fulfilmentType === 'Delivery' && o.deliveryStatus) {
-            html += ` <span class="status-pill status-confirmed">${o.deliveryStatus}</span>`;
+            html += ` <span class="status-pill status-confirmed">${escapeHtml(o.deliveryStatus)}</span>`;
         }
         return html;
     }

@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${orders.map(o => `
                     <div class="order-card" onclick="window.location.href='order-detail.html?id=${o.orderId}'">
                         <div class="order-card-left">
-                            <div class="order-card-no">${o.orderNo}</div>
+                            <div class="order-card-no">${escapeHtml(o.orderNo)}</div>
                             <div class="order-card-items">
-                                ${o.listingNames?.join(', ') || '-'}
+                                ${escapeHtml(o.listingNames?.join(', ') || '-')}
                             </div>
                             <div class="order-card-date">${formatDateShort(o.orderedOn)}</div>
                         </div>
@@ -89,6 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         btn.textContent = 'Redirecting...';
 
         const result = await OrderAPI.resumePayment(orderId);
+        if (result.isSuccessful && !result.data?.paymentAuthorizationUrl) {
+            showToast(result.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+            return;
+        }
 
         if (!result.isSuccessful || !result.data?.paymentAuthorizationUrl) {
             showToast(result.message || 'Could not start payment.', 'error');

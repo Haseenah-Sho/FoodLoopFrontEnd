@@ -200,6 +200,10 @@ body {
     align-items: center;
     padding: 0 24px;
     gap: 14px;
+    position: relative;
+}
+
+.dashboard-sticky-top {
     position: sticky;
     top: 0;
     z-index: 100;
@@ -378,6 +382,29 @@ body {
     padding: 24px;
     flex: 1;
 }
+
+.back-to-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+}
+.back-to-list:hover { color: var(--primary-dark); }
+
+.btn-cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dark-muted);
+    text-decoration: none;
+}
+.btn-cancel-link:hover { color: var(--primary); }
 
 /* ── STATS ROW ── */
 .stats-row {
@@ -1335,4 +1362,67 @@ body {
     color: #c62828;
     cursor: pointer;
     font-size: 0.9rem;
+}
+/* ── LISTING STATUS + ROW ACTIONS ── */
+.status-draft { background: #fff4dc; color: #8a5a00; }
+.status-withdrawn { background: #eceff1; color: #546e7a; }
+
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.btn-row {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--border);
+    background: var(--white);
+    color: var(--dark);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+}
+.btn-row:hover { border-color: var(--primary); color: var(--primary); }
+.btn-row.danger { color: #c62828; border-color: rgba(198,40,40,0.25); }
+.btn-row.danger:hover { background: #c62828; color: var(--white); border-color: #c62828; }
+.btn-row.primary { background: var(--primary); color: var(--white); border-color: var(--primary); }
+.btn-row.primary:hover { background: var(--primary-dark); color: var(--white); }
+.btn-row:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── REVIEW PAGE ── */
+.review-banner {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: #fff4dc; border: 1px solid #f0d9a8; color: #5c3d00;
+    border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px;
+    max-width: 860px; font-size: 0.85rem; line-height: 1.5;
+}
+.review-banner i { font-size: 1.1rem; margin-top: 1px; }
+
+.review-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; max-width: 860px;
+    display: grid; grid-template-columns: 280px 1fr;
+}
+.review-images { background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.review-img-main { width: 100%; max-height: 240px; object-fit: cover; border-radius: var(--radius-sm); }
+.review-thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.review-thumbs img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid transparent; opacity: 0.7; }
+.review-thumbs img.active { border-color: var(--primary); opacity: 1; }
+.review-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.review-title { font-size: 1.15rem; font-weight: 800; color: var(--dark); }
+.review-sub { font-size: 0.82rem; color: var(--dark-muted); }
+.review-price { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+.review-price.free { color: var(--primary-light); }
+.review-desc { font-size: 0.85rem; color: var(--dark-muted); line-height: 1.6; }
+.review-lines { display: flex; flex-direction: column; gap: 5px; font-size: 0.8rem; color: var(--dark-muted); }
+.review-lines i { margin-right: 6px; color: var(--primary); }
+.review-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.review-pill { padding: 5px 10px; background: var(--surface-alt); border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: var(--primary-dark); }
+
+.review-actions { display: flex; gap: 10px; margin-top: 20px; max-width: 860px; flex-wrap: wrap; }
+.review-actions .btn-row { height: 42px; padding: 0 20px; font-size: 0.85rem; }
+
+@media (max-width: 700px) {
+    .review-card { grid-template-columns: 1fr; }
 }

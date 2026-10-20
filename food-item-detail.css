@@ -26,10 +26,8 @@ body {
 /* ── NAVBAR ── */
 .navbar {
     background: var(--primary-dark);
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 100;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
@@ -97,8 +95,6 @@ body {
 
 /* ── PAGE LAYOUT ── */
 .detail-page {
-    margin-top: 52px;
-    min-height: calc(100vh - 52px);
     display: flex;
     align-items: flex-start;
     justify-content: center;

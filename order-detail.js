@@ -39,14 +39,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('od-vendorName').textContent = o.vendorName;
         document.getElementById('od-vendorPhone').innerHTML = o.vendorPhone
-            ? `<i class="bi bi-telephone"></i> ${o.vendorPhone}`
+            ? `<i class="bi bi-telephone"></i> ${escapeHtml(o.vendorPhone)}`
             : '';
 
         document.getElementById('od-items').innerHTML = o.items.map(i => `
             <div class="od-item">
                 ${itemImage(i.imageUrl, i.foodName)}
                 <div class="od-item-info">
-                    <div class="od-item-name">${i.foodName}</div>
+                    <div class="od-item-name">${escapeHtml(i.foodName)}</div>
                     <div class="od-item-sub">Qty: ${i.quantity}${i.pickUpStart ? ` · Pickup ${formatDate(i.pickUpStart)} – ${formatDate(i.pickUpEnd)}` : ''}</div>
                 </div>
                 <div class="od-item-price">${i.isFree ? 'Free' : formatCurrency((i.unitPrice || 0) * i.quantity)}</div>
@@ -64,12 +64,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('od-total').textContent =
             o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free';
 
-        // Completed orders can report a mismatch; delivery orders awaiting the customer's
-        // confirmation can either confirm receipt or report a problem the same way.
+        // Completed orders can be rated and can report a mismatch; delivery orders awaiting the
+        // customer's confirmation can either confirm receipt or report a problem the same way.
         const awaitingDeliveryConfirmation =
             o.fulfilmentType === 'Delivery' && o.status === 'Confirmed' && o.deliveryStatus === 'Delivered';
 
         if (o.status === 'Completed') {
+            renderRatingSection(o);
             document.getElementById('mismatch-report').style.display = 'block';
         }
 
@@ -96,11 +97,104 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // ── Ratings: one card per item, only on completed orders ──
+    function renderRatingSection(o) {
+        const section = document.getElementById('rate-section');
+        if (!section) return;
+
+        // hasRated is optional: if the server doesn't send it yet, every item is shown
+        const toRate = o.items.filter(i => i.hasRated !== true);
+        section.style.display = 'block';
+
+        if (toRate.length === 0) {
+            section.innerHTML = '<div class="rate-done"><i class="bi bi-check-circle"></i> Thanks for reviewing your food.</div>';
+            return;
+        }
+
+        section.innerHTML = '<div class="order-detail-section-title">Rate your food</div>' +
+            toRate.map(i => `
+                <div class="rate-card" data-listing="${escapeHtml(i.listingId)}">
+                    <div class="rate-card-title">${escapeHtml(i.foodName)}</div>
+                    <div class="rate-stars">
+                        ${[1, 2, 3, 4, 5].map(n =>
+                            `<i class="bi bi-star" data-value="${n}" aria-label="${n} star${n > 1 ? 's' : ''}"></i>`).join('')}
+                    </div>
+                    <textarea class="dash-input dash-textarea rate-comment" rows="2" maxlength="500"
+                        placeholder="How was it? (optional)"></textarea>
+                    <div class="dash-field-error rate-error"></div>
+                    <button type="button" class="btn-primary-sm rate-submit" style="align-self:flex-start;">Submit review</button>
+                </div>
+            `).join('');
+
+        section.querySelectorAll('.rate-card').forEach(setupRateCard);
+    }
+
+    function setupRateCard(card) {
+        const stars = card.querySelectorAll('.rate-stars i');
+        const errorEl = card.querySelector('.rate-error');
+        const submitBtn = card.querySelector('.rate-submit');
+        let selected = 0;
+
+        const paint = (upTo) => stars.forEach(s => {
+            s.className = parseInt(s.dataset.value) <= upTo ? 'bi bi-star-fill active' : 'bi bi-star';
+        });
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                selected = parseInt(star.dataset.value);
+                errorEl.textContent = '';
+                paint(selected);
+            });
+            star.addEventListener('mouseover', () => paint(parseInt(star.dataset.value)));
+            star.addEventListener('mouseout', () => paint(selected));
+        });
+
+        submitBtn.addEventListener('click', async () => {
+            errorEl.textContent = '';
+
+            if (selected === 0) {
+                errorEl.textContent = 'Please choose a star rating.';
+                return;
+            }
+
+            const comment = card.querySelector('.rate-comment').value.trim();
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+
+            const result = await RatingAPI.add({
+                listingId: card.dataset.listing,
+                stars: selected,
+                comment: comment || null
+            });
+
+            if (!result.isSuccessful) {
+                if (/already/i.test(result.message || '')) {
+                    card.innerHTML = '<div class="rate-done">You have already reviewed this item.</div>';
+                    return;
+                }
+                errorEl.textContent = result.message || 'Could not submit your review.';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit review';
+                return;
+            }
+
+            card.innerHTML = '<div class="rate-done"><i class="bi bi-check-circle"></i> Thanks for your review!</div>';
+        });
+    }
+
     async function payNow(id, btn) {
         btn.disabled = true;
         btn.innerHTML = 'Redirecting...';
 
         const result = await OrderAPI.resumePayment(id);
+
+        // Payment had already gone through: no new payment link, just refresh
+        if (result.isSuccessful && !result.data?.paymentAuthorizationUrl) {
+            showToast(result.message, 'success');
+            setTimeout(() => window.location.reload(), 1200);
+            return;
+        }
 
         if (!result.isSuccessful || !result.data?.paymentAuthorizationUrl) {
             showToast(result.message || 'Could not start payment.', 'error');
@@ -110,6 +204,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         window.location.href = result.data.paymentAuthorizationUrl;
+    }
+
+    // Shared by Edit and Cancel: restore the button, and refresh if the order has moved on
+    function handleCancelFailure(result, btn, restoreHtml, fallbackMessage) {
+        showToast(result.message || fallbackMessage, 'error');
+        btn.disabled = false;
+        btn.innerHTML = restoreHtml;
+
+        if (/already received|no longer be cancelled/i.test(result.message || '')) {
+            setTimeout(() => window.location.reload(), 2500);
+        }
     }
 
     async function editOrder(o, btn) {
@@ -127,9 +232,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await OrderAPI.cancelOrder(o.orderId);
 
         if (!result.isSuccessful) {
-            showToast(result.message || 'Could not start editing this order.', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-pencil"></i> Edit Order';
+            handleCancelFailure(
+                result, btn,
+                '<i class="bi bi-pencil"></i> Edit Order',
+                'Could not start editing this order.');
             return;
         }
 
@@ -145,9 +251,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await OrderAPI.cancelOrder(id);
 
         if (!result.isSuccessful) {
-            showToast(result.message || 'Could not cancel order.', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-x-circle"></i> Cancel Order';
+            handleCancelFailure(
+                result, btn,
+                '<i class="bi bi-x-circle"></i> Cancel Order',
+                'Could not cancel this order.');
             return;
         }
 
@@ -157,8 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function itemImage(url, alt) {
         if (!url) return `<div class="od-item-img-placeholder"><i class="bi bi-image"></i></div>`;
-        const fullUrl = url.startsWith('/') ? `https://localhost:7208${url}` : url;
-        return `<img src="${fullUrl}" alt="${alt}" class="od-item-img" onerror="this.outerHTML='<div class=\\'od-item-img-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`;
+        return `<img src="${escapeHtml(resolveImageUrl(url))}" alt="${escapeHtml(alt)}" class="od-item-img" onerror="this.outerHTML='<div class=\\'od-item-img-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`;
     }
 
     function setupSidebar() {

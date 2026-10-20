@@ -51,8 +51,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${transactions.map(t => `
                         <tr>
-                            <td class="food-name">${t.orderNo}</td>
-                            <td>${t.customerName || '-'}</td>
+                            <td class="food-name">${escapeHtml(t.orderNo)}</td>
+                            <td>${escapeHtml(t.customerName || '-')}</td>
                             <td>${formatCurrency(t.amount)}</td>
                             <td>${paymentPill(t.paymentStatus)}</td>
                             <td>${t.paidAt ? formatDateShort(t.paidAt) : '-'}</td>
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Pending': 'status-pending',
             'Failed': 'status-cancelled'
         };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
+        return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status)}</span>`;
     }
 
     function formatCurrency(amount) {

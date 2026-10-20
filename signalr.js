@@ -11,7 +11,7 @@ function initSignalR() {
     if (!token) return;
 
     const connection = new signalR.HubConnectionBuilder()
-        .withUrl('https://localhost:7208/hubs/notifications', {
+        .withUrl(`${API_ORIGIN}/hubs/notifications`, {
             accessTokenFactory: () => token
         })
         .withAutomaticReconnect()
@@ -70,23 +70,28 @@ function initSignalR() {
         console.log('Stock changed:', data);
 
         // Update listing card on landing page
-        const card = document.querySelector(`.listing-card[data-id="${data.listingId}"]`);
+                const card = document.querySelector(`.listing-card[data-id="${data.listingId}"]`);
         if (card) {
-            const portionsEl = card.querySelector('.listing-card-portions');
-            if (portionsEl) {
+            if (data.status === 'Withdrawn') {
+                card.remove();
+                scheduleListingsRefresh();
+            } else {
+                const portionsEl = card.querySelector('.listing-card-portions');
+                if (portionsEl) {
                 const isLow = data.remainingPortion <= 3 && data.remainingPortion > 0;
-                portionsEl.innerHTML = `
-                    <i class="bi bi-${isLow ? 'exclamation-circle' : 'layers'}"></i>
-                    ${data.remainingPortion} left
-                `;
-                portionsEl.className = `listing-card-portions${isLow ? ' low' : ''}`;
-            }
+                    portionsEl.innerHTML = `
+                        <i class="bi bi-${isLow ? 'exclamation-circle' : 'layers'}"></i>
+                        ${data.remainingPortion} left
+                    `;
+                    portionsEl.className = `listing-card-portions${isLow ? ' low' : ''}`;
+                }
 
-            // Hide card if sold out
-            if (data.remainingPortion <= 0 || data.status === 'Completed') {
-                card.style.transition = 'opacity 0.5s';
-                card.style.opacity = '0.4';
-                card.style.pointerEvents = 'none';
+                // Dim the card if sold out
+                if (data.remainingPortion <= 0 || data.status === 'Completed') {
+                    card.style.transition = 'opacity 0.5s';
+                    card.style.opacity = '0.4';
+                    card.style.pointerEvents = 'none';
+                }
             }
         }
 
@@ -100,7 +105,7 @@ function initSignalR() {
             `;
             if (isLow) portionsEl.classList.add('low');
 
-            if (data.remainingPortion <= 0) {
+            if (data.remainingPortion <= 0 || data.status === 'Withdrawn') {
                 // Show sold out state
                 document.getElementById('order-form')?.style &&
                     (document.getElementById('order-form').style.display = 'none');
@@ -117,7 +122,10 @@ function initSignalR() {
     showToast(`New Food Items available: ${data.foodName}`, 'success');
 
     const grid = document.getElementById('listings-grid');
-    if (!grid) return;
+        if (grid && grid.classList.contains('listings-grid')) {
+            conn.invoke('JoinBrowseGroup')
+                .catch(err => console.error('JoinBrowseGroup error:', err));
+        }
 
     // Add new card to top of grid
     const newCard = document.createElement('div');

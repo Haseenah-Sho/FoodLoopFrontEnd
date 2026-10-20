@@ -33,26 +33,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('checkout-items-list').innerHTML = cart.items.map(item => {
             const lineTotal = item.isFree ? 0 : (item.price || 0) * item.quantity;
-            const imgUrl = item.imageUrl
-                ? (item.imageUrl.startsWith('/') ? `https://localhost:7208${item.imageUrl}` : item.imageUrl)
-                : null;
+            const imgUrl = resolveImageUrl(item.imageUrl) || null;
 
             return `
                 <div class="checkout-item" data-id="${item.listingId}">
                     ${imgUrl
-                        ? `<img src="${imgUrl}" class="checkout-item-img" alt="${item.foodName}" onerror="this.outerHTML='<div class=\\'checkout-item-img-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`
+                        ? `<img src="${escapeHtml(imgUrl)}" class="checkout-item-img" alt="${escapeHtml(item.foodName)}" onerror="this.outerHTML='<div class=\\'checkout-item-img-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`
                         : `<div class="checkout-item-img-placeholder"><i class="bi bi-image"></i></div>`}
                     <div class="checkout-item-info">
-                        <div class="checkout-item-name">${item.foodName}</div>
+                        <div class="checkout-item-name">${escapeHtml(item.foodName)}</div>
                         <div class="checkout-item-price">${item.isFree ? 'Free' : formatCurrency(item.price) + ' each'}</div>
                     </div>
                     <div class="checkout-item-controls">
                         <div class="checkout-qty-controls">
-                            <button class="qty-minus" data-id="${item.listingId}" ${item.quantity <= 1 ? 'disabled' : ''}>
+                            <button class="checkout-qty-btn qty-minus" data-id="${item.listingId}" ${item.quantity <= 1 ? 'disabled' : ''}>
                                 <i class="bi bi-dash"></i>
                             </button>
                             <span class="checkout-qty-value">${item.quantity}</span>
-                            <button class="qty-plus" data-id="${item.listingId}" ${item.quantity >= item.maxQty ? 'disabled' : ''}>
+                            <button class="checkout-qty-btn qty-plus" data-id="${item.listingId}" ${item.quantity >= item.maxQty ? 'disabled' : ''}>
                                 <i class="bi bi-plus"></i>
                             </button>
                         </div>
@@ -154,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const select = document.getElementById('checkoutZoneSelect');
         select.innerHTML = '<option value="">Select your area</option>' +
             deliveryZones.map(z =>
-                `<option value="${z.zoneId}" data-fee="${z.fee}">${z.zoneName} — ${formatCurrency(z.fee)}</option>`
+                `<option value="${z.zoneId}" data-fee="${z.fee}">${escapeHtml(z.zoneName)} — ${formatCurrency(z.fee)}</option>`
             ).join('');
 
         select.onchange = () => {

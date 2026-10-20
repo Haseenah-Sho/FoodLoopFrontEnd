@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        showFormSuccess('Reset code sent! Check your email and enter the code on the next page.');
-        setTimeout(() => window.location.href = `reset-password.html`, 2500);
+        showFormSuccess('If that email is registered, a reset code is on its way. Check your inbox and enter it on the next page.');
+        setTimeout(() => window.location.href = `reset-password.html?email=${encodeURIComponent(email)}`, 2500);
     });
 
     function setLoading(loading) {

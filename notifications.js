@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const unread = notifications.filter(n => !n.isRead);
 
     const markAllBtn = document.getElementById('mark-all-btn');
-    if (unread.length > 0) markAllBtn.style.display = 'inline-flex';
+    markAllBtn.style.display = unread.length > 0 ? 'inline-flex' : 'none';
 
     if (notifications.length === 0) {
         container.innerHTML = `
@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <i class="bi ${notifIcon(n.notificationType)}"></i>
                     </div>
                     <div class="notif-body">
-                        <div class="notif-title">${n.title}</div>
-                        <div class="notif-message">${n.messageContent}</div>
+                        <div class="notif-title">${escapeHtml(n.title)}</div>
+                        <div class="notif-message">${escapeHtml(n.messageContent)}</div>
                         <div class="notif-time">${formatDateShort(n.dateCreated)}</div>
                     </div>
                     ${!n.isRead ? `

@@ -75,9 +75,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody id="pending-vendors-body">
                     ${vendors.map(v => `
                         <tr id="vendor-row-${v.vendorId}">
-                            <td class="food-name">${v.organizationName}</td>
-                            <td>${v.email}</td>
-                            <td>${v.phoneNumber}</td>
+                            <td class="food-name">${escapeHtml(v.organizationName)}</td>
+                            <td>${escapeHtml(v.email)}</td>
+                            <td>${escapeHtml(v.phoneNumber)}</td>
                             <td>${formatDateShort(v.registeredOn)}</td>
                             <td>
                                 <button
@@ -160,8 +160,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${recent.map(l => `
                         <tr>
-                            <td class="food-name">${l.foodName}</td>
-                            <td>${l.vendorName}</td>
+                            <td class="food-name">${escapeHtml(l.foodName)}</td>
+                            <td>${escapeHtml(l.vendorName)}</td>
                             <td>${l.isFree ? 'Free' : formatCurrency(l.price)}</td>
                             <td>${l.remainingPortion} left</td>
                             <td>${listingStatusPill(l.status)}</td>
@@ -210,13 +210,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Helpers ──
     function listingStatusPill(status) {
-        const map = {
-            'Active': 'status-confirmed',
-            'Completed': 'status-completed',
-            'Expired': 'status-cancelled'
-        };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
-    }
+    const map = {
+        'Active': 'status-confirmed',
+        'Completed': 'status-completed',
+        'Expired': 'status-cancelled',
+        'Withdrawn': 'status-withdrawn'
+    };
+    return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status)}</span>`;
+}
 
     function formatCurrency(amount) {
         return '₦' + Number(amount).toLocaleString('en-NG');

@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${vendors.map(v => `
                         <tr id="vendor-row-${v.vendorId}">
-                            <td class="food-name">${v.organizationName}</td>
-                            <td>${v.email}</td>
-                            <td>${v.phoneNumber}</td>
+                            <td class="food-name">${escapeHtml(v.organizationName)}</td>
+                            <td>${escapeHtml(v.email)}</td>
+                            <td>${escapeHtml(v.phoneNumber)}</td>
                             <td>${v.totalListings}</td>
                             <td>
                                 <span class="status-pill ${v.isApproved ? 'status-confirmed' : 'status-pending'}">

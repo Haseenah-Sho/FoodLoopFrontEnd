@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('info-panel').style.display = 'flex';
 
     // Image gallery
-    let imageUrls = (l.imageUrls || []).map(u => u.startsWith('/') ? `https://localhost:7208${u}` : u);
+    let imageUrls = (l.imageUrls || []).map(resolveImageUrl);
     const img = document.getElementById('detail-img');
     const placeholder = document.getElementById('detail-img-placeholder');
     const thumbStrip = document.getElementById('detail-thumb-strip');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (imageUrls.length > 1) {
         thumbStrip.style.display = 'flex';
         thumbStrip.innerHTML = imageUrls.map((url, i) =>
-            `<img src="${url}" class="detail-thumb${i === 0 ? ' active' : ''}" data-index="${i}">`
+            `<img src="${escapeHtml(url)}" class="detail-thumb${i === 0 ? ' active' : ''}" data-index="${i}">`
         ).join('');
 
         thumbStrip.querySelectorAll('.detail-thumb').forEach(thumb => {
@@ -96,10 +96,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Name + vendor
     document.getElementById('detail-name').textContent = l.foodName;
-    document.getElementById('detail-vendor').innerHTML =
-        `${l.vendorName}`;
+    document.getElementById('detail-vendor').textContent = l.vendorName;
     document.getElementById('detail-location').innerHTML =
-        `<i class="bi bi-geo-alt"></i> ${l.address}`;
+    `<i class="bi bi-geo-alt"></i> ${escapeHtml(l.address)}`;
     const foodTypeLabels = {
         FreshlyCookedMeal: 'Freshly Cooked Meal', BakedGoods: 'Baked Goods',
         RawProduce: 'Raw Produce', PackagedOrProcessed: 'Packaged / Processed'
@@ -113,10 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.getElementById('detail-safety-info').innerHTML = `
-        <div class="safety-row"><i class="bi bi-egg-fried"></i> ${foodTypeLabels[l.foodType] || l.foodType}</div>
-        <div class="safety-row"><i class="bi bi-thermometer-half"></i> ${storageLabels[l.storageInstruction] || l.storageInstruction}</div>
+        <div class="safety-row"><i class="bi bi-egg-fried"></i> ${escapeHtml(foodTypeLabels[l.foodType] || l.foodType)}</div>
+        <div class="safety-row"><i class="bi bi-thermometer-half"></i> ${escapeHtml(storageLabels[l.storageInstruction] || l.storageInstruction)}</div>
         <div class="safety-row safety-best-before"><i class="bi bi-clock-history"></i> Best before ${bestBefore}</div>
-        ${l.allergens ? `<div class="safety-row"><i class="bi bi-exclamation-triangle"></i> Contains: ${l.allergens}</div>` : ''}
+        ${l.allergens ? `<div class="safety-row"><i class="bi bi-exclamation-triangle"></i> Contains: ${escapeHtml(l.allergens)}</div>` : ''}
     `;
 
     // Badge
@@ -231,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const select = document.getElementById('deliveryZoneSelect');
         select.innerHTML = '<option value="">Select your area</option>' +
             currentDeliveryZones.map(z =>
-                `<option value="${z.zoneId}" data-fee="${z.fee}">${z.zoneName} - ${formatCurrency(z.fee)}</option>`
+                `<option value="${z.zoneId}" data-fee="${z.fee}">${escapeHtml(z.zoneName)} - ${formatCurrency(z.fee)}</option>`
             ).join('');
 
         select.onchange = () => {
@@ -382,23 +381,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const list = document.getElementById('ratings-list');
         if (ratings.length === 0) {
-            list.innerHTML = `<p class="ratings-empty">No reviews yet. Be the first to review this food item.</p>`;
+            list.innerHTML = `<p class="ratings-empty">No reviews yet.</p>`;
         } else {
             list.innerHTML = ratings.map(r => `
                 <div class="rating-item">
                     <div class="rating-item-header">
-                        <span class="rating-item-name">${r.customerName}</span>
+                        <span class="rating-item-name">${escapeHtml(r.customerName)}</span>
                         <span class="rating-item-date">${formatDateShort(r.ratedOn)}</span>
                     </div>
                     <div class="rating-item-stars">${buildStars(r.stars)}</div>
-                    ${r.comment ? `<p class="rating-item-comment">${r.comment}</p>` : ''}
+                    ${r.comment ? `<p class="rating-item-comment">${escapeHtml(r.comment)}</p>` : ''}
                 </div>
             `).join('');
-        }
-
-        if (Auth.isLoggedIn() && Auth.hasRole('app_customer')) {
-            document.getElementById('add-rating').style.display = 'flex';
-            setupRatingForm();
         }
     }
 

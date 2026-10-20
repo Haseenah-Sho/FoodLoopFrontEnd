@@ -44,10 +44,26 @@
     margin-bottom: 18px;
 }
 
-.order-detail-vendor i {
-    font-size: 1.2rem;
-    color: var(--primary);
+.order-detail-vendor > i { font-size: 1.2rem; color: var(--primary); }
+.od-vendor-phone i { font-size: 0.8rem; margin-right: 4px; }
+
+/* ── RATING ── */
+#rate-section { margin: 0 0 18px; }
+
+.rate-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
+.rate-card-title { font-size: 0.85rem; font-weight: 700; color: var(--dark); }
+.rate-stars { display: flex; gap: 4px; }
+.rate-stars i { font-size: 1.3rem; color: var(--border); cursor: pointer; transition: color 0.15s; }
+.rate-stars i.active { color: var(--accent); }
+.rate-done { font-size: 0.85rem; color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 6px; }
 
 .od-vendor-name {
     font-size: 0.88rem;

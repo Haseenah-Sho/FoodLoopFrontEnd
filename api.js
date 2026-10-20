@@ -11,14 +11,23 @@ async function apiFetch(endpoint, options = {}) {
         delete headers['Content-Type'];
     }
 
-    try {
-        const response = await fetch(`${BASE_URL}${endpoint}`, {
-            ...options,
-            headers
-        });
+        try {
+        const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 
-        const data = await response.json();
-        return data;
+        if (response.status === 401 && token) {
+            Auth.removeToken();
+            Auth.removeUser();
+            window.location.href = 'login.html';
+            return { isSuccessful: false, message: 'Your session has expired. Please sign in again.' };
+        }
+        if (response.status === 403) {
+            return { isSuccessful: false, message: "You don't have access to this." };
+        }
+        if (response.status === 429) {
+            return { isSuccessful: false, message: 'Too many attempts. Please wait a minute and try again.' };
+        }
+
+        return await response.json();
     } catch (error) {
         console.error('API Error:', error);
         return { isSuccessful: false, message: 'Network error. Please try again.' };
@@ -73,6 +82,11 @@ const ListingAPI = {
     getDetails: (id) => apiFetch(`/listing/${id}`),
     create: (formData) => apiFetch('/listing', { method: 'POST', body: formData }),
     getVendorListings: () => apiFetch('/listing/vendor-listings'),
+    getMine: (id) => apiFetch(`/listing/vendor-listings/${id}`),
+    updateDraft: (id, formData) => apiFetch(`/listing/${id}/draft`, { method: 'PUT', body: formData }),
+    publish: (id) => apiFetch(`/listing/${id}/publish`, { method: 'POST' }),
+    discardDraft: (id) => apiFetch(`/listing/${id}/draft`, { method: 'DELETE' }),
+    withdraw: (id) => apiFetch(`/listing/${id}/withdraw`, { method: 'POST' }),
 };
 
 // Orders

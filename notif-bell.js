@@ -59,8 +59,8 @@ const NotifBell = {
 
         list.innerHTML = NotifBell.notifications.slice(0, 20).map((n, i) => `
             <div class="notif-item ${n.isRead ? '' : 'unread'}" data-index="${i}">
-                <div class="title">${n.title}</div>
-                <div class="msg">${n.messageContent}</div>
+                <div class="title">${escapeHtml(n.title)}</div>
+                <div class="msg">${escapeHtml(n.messageContent)}</div>
                 <div class="time">${NotifBell.formatDate(n.dateCreated)}</div>
             </div>
         `).join('');
@@ -85,7 +85,7 @@ const NotifBell = {
         }
 
         const type = notification.notificationType;
-        if (['NewOrderReceived', 'OrderStatusChanged'].includes(type)) {
+        if (['NewOrder', 'NewOrderReceived', 'OrderStatusChanged'].includes(type)) {
             window.location.href = Auth.hasRole('app_vendor') ? 'food-providers-orders.html' : 'my-orders.html';
         } else if (type === 'PaymentConfirmed') {
             window.location.href = 'my-orders.html';

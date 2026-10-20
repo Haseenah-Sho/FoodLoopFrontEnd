@@ -9,10 +9,10 @@ function statusPill(order) {
         'Completed': 'status-completed',
         'Cancelled': 'status-cancelled'
     };
-    let html = `<span class="status-pill ${map[order.status] || 'status-pending'}">${order.status}</span>`;
+    let html = `<span class="status-pill ${map[order.status] || 'status-pending'}">${escapeHtml(order.status)}</span>`;
     if (order.fulfilmentType === 'Delivery' && order.deliveryStatus) {
-        html += ` <span class="status-pill status-confirmed">${order.deliveryStatus}</span>`;
-    }
+    html += ` <span class="status-pill status-confirmed">${escapeHtml(order.deliveryStatus)}</span>`;
+}
     return html;
 }
 

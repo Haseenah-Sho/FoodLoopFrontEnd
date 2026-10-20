@@ -1,4 +1,10 @@
-const BASE_URL = 'https://localhost:7208/api';
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_ORIGIN = IS_LOCAL ? 'https://localhost:7208' : 'https://api.your-domain.com'; // set at deployment
+const BASE_URL = `${API_ORIGIN}/api`;
+
+function resolveImageUrl(path) {
+    return path && path.startsWith('/') ? `${API_ORIGIN}${path}` : path;
+}
 
 const Auth = {
     getToken: () => sessionStorage.getItem('fl_token'),
@@ -19,6 +25,15 @@ const Auth = {
 }
 };
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function showToast(message, type = 'success') {
     const existing = document.getElementById('fl-toast-container');
     if (existing) existing.remove();
@@ -32,35 +47,42 @@ function showToast(message, type = 'success') {
 
     const container = document.createElement('div');
     container.id = 'fl-toast-container';
-    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:300px;';
+    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:9999;min-width:300px;max-width:90vw;';
 
-    container.innerHTML = `
-        <div style="
-            background:${bgColors[type] || bgColors.success};
-            color:#fff;
-            padding:14px 18px;
-            border-radius:10px;
-            box-shadow:0 4px 16px rgba(0,0,0,0.2);
-            font-size:0.9rem;
-            font-weight:500;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:12px;
-            animation:slideIn 0.3s ease;
-        ">
-            <span>${message}</span>
-            <span onclick="this.closest('#fl-toast-container').remove()" 
-                  style="cursor:pointer;opacity:0.8;font-size:1.1rem;">✕</span>
-        </div>
-        <style>
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        </style>
+    const box = document.createElement('div');
+    box.style.cssText = `
+        background:${bgColors[type] || bgColors.success};
+        color:#fff;
+        padding:14px 18px;
+        border-radius:10px;
+        box-shadow:0 4px 16px rgba(0,0,0,0.2);
+        font-size:0.9rem;
+        font-weight:500;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+        animation:slideIn 0.3s ease;
     `;
 
+    const text = document.createElement('span');
+    text.textContent = message;
+
+    const close = document.createElement('span');
+    close.textContent = '✕';
+    close.style.cssText = 'cursor:pointer;opacity:0.8;font-size:1.1rem;';
+    close.addEventListener('click', () => container.remove());
+
+    box.append(text, close);
+
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }`;
+
+    container.append(box, style);
     document.body.appendChild(container);
     setTimeout(() => container.remove(), 4500);
 }
@@ -134,9 +156,11 @@ function getStatusPill(status) {
         'Cancelled': 'status-cancelled',
         'Confirmed': 'status-completed',
         'Expired': 'status-expired',
+        'Draft': 'status-draft',
+        'Withdrawn': 'status-withdrawn',
     };
     const cls = map[status] || 'status-pending';
-    return `<span class="status-pill ${cls}">${status}</span>`;
+    return `<span class="status-pill ${cls}">${escapeHtml(status)}</span>`;
 }
 
 function getStars(rating) {

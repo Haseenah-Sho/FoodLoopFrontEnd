@@ -13,12 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('emailInput').value = prefillEmail;
     }
 
+    const FIELD_ERRORS = { emailInput: 'email-error', tokenInput: 'token-error' };
+
+    Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) => {
+        const input = document.getElementById(inputId);
+        if (input) input.addEventListener('input', () => clearFieldError(errorId, input));
+    });
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const email = document.getElementById('emailInput').value.trim();
         const token = document.getElementById('tokenInput').value.trim();
 
+        Object.entries(FIELD_ERRORS).forEach(([inputId, errorId]) =>
+        clearFieldError(errorId, document.getElementById(inputId)));
         let hasError = false;
 
         if (!email || !isValidEmail(email)) {

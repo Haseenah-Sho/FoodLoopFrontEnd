@@ -84,8 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tbody>
                     ${recent.map(o => `
                         <tr class="clickable-row" onclick="window.location.href='order-detail.html?id=${o.orderId}'">
-                            <td class="food-name">${o.orderNo}</td>
-                            <td>${o.listingNames?.join(', ') || '—'}</td>
+                            <td class="food-name">${escapeHtml(o.orderNo)}</td>
+                            <td>${escapeHtml(o.listingNames?.join(', ') || '—')}</td>
                             <td>${o.totalAmount > 0 ? formatCurrency(o.totalAmount) : 'Free'}</td>
                             <td>${statusPill(o.status)}</td>
                             <td>${formatDateShort(o.orderedOn)}</td>
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             'Completed': 'status-completed',
             'Cancelled': 'status-cancelled'
         };
-        return `<span class="status-pill ${map[status] || 'status-pending'}">${status}</span>`;
+        return `<span class="status-pill ${map[status] || 'status-pending'}">${escapeHtml(status)}</span>`;
     }
 
     function formatDateShort(dateString) {

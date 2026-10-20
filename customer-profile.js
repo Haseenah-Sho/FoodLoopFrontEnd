@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('profile-details').innerHTML =
-                `<p style="color:#c62828;font-size:0.875rem;">${result.message || 'Could not load profile.'}</p>`;
+                `<p style="color:#c62828;font-size:0.875rem;">${escapeHtml(result.message || 'Could not load profile.')}</p>`;
             document.getElementById('profile-details').style.display = 'block';
             return;
         }
@@ -52,6 +52,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Save changes
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        ['phoneNumber', 'address'].forEach(id => {
+    document.getElementById(`${id}-error`).textContent = '';
+    document.getElementById(id).classList.remove('is-invalid');
+    });
 
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const address = document.getElementById('address').value.trim();

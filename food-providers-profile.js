@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!result.isSuccessful) {
             document.getElementById('profile-details').innerHTML =
-                `<p style="color:#c62828;font-size:0.875rem;">${result.message || 'Could not load profile.'}</p>`;
+                `<p style="color:#c62828;font-size:0.875rem;">${escapeHtml(result.message || 'Could not load profile.')}</p>`
             document.getElementById('profile-details').style.display = 'block';
             return;
         }
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (currentProfile.hasPayoutAccountLinked) {
             document.getElementById('payout-bank').textContent = currentProfile.bankName;
-            document.getElementById('payout-account-number').textContent = currentProfile.bankAccountNumber;
+            document.getElementById('payout-account-number').textContent = '******' + String(currentProfile.bankAccountNumber).slice(-4);
             document.getElementById('payout-account-name').textContent = currentProfile.accountName;
             linkedEl.style.display = 'block';
             unlinkedEl.style.display = 'none';
@@ -98,13 +98,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await VendorAPI.getBanks();
 
         if (!result.isSuccessful || !result.data || result.data.length === 0) {
-            select.innerHTML = `<option value="">${result.message || 'Could not load banks - try refreshing'}</option>`;
+            select.innerHTML = `<option value="">${escapeHtml(result.message || 'Could not load banks - try refreshing')}</option>`;
             return;
         }
 
         banksList = result.data;
         select.innerHTML = '<option value="">Select your bank</option>' +
-            banksList.map(b => `<option value="${b.code}">${b.name}</option>`).join('');
+            banksList.map(b => `<option value="${escapeHtml(b.code)}">${escapeHtml(b.name)}</option>`).join('')
     }
 
     // Resolve account name once both bank and a full 10-digit account number are present
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('zones-list');
 
         if (!result.isSuccessful) {
-            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${result.message || 'Could not load zones.'}</p>`;
+            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${escapeHtml(result.message || 'Could not load zones.')}</p>`;
             return;
         }
 
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         list.innerHTML = zones.map(z => `
             <div class="zone-row">
-                <span><strong>${z.zoneName}</strong> - ₦${Number(z.fee).toLocaleString('en-NG')}</span>
+                <span><strong>${escapeHtml(z.zoneName)}</strong> - ₦${Number(z.fee).toLocaleString('en-NG')}</span>
                 <button class="zone-remove" onclick="removeZone('${z.zoneId}')"><i class="bi bi-trash"></i></button>
             </div>
         `).join('');
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('points-list');
 
         if (!result.isSuccessful) {
-            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${result.message || 'Could not load locations.'}</p>`;
+            list.innerHTML = `<p style="font-size:0.82rem;color:#c62828;">${escapeHtml(result.message || 'Could not load locations.')}</p>`;
             return;
         }
 
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         list.innerHTML = points.map(p => `
             <div class="zone-row">
-                <span><strong>${p.pointName}</strong> - ${p.address}</span>
+                <span><strong>${escapeHtml(p.pointName)}</strong> - ${escapeHtml(p.address)}</span>
                 <button class="zone-remove" onclick="removePoint('${p.pointId}')"><i class="bi bi-trash"></i></button>
             </div>
         `).join('');
@@ -334,6 +334,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        ['orgName', 'phoneNumber', 'addressInput'].forEach(id => {
+            document.getElementById(`${id}-error`).textContent = '';
+            document.getElementById(id).classList.remove('is-invalid');
+        });
         const orgName = document.getElementById('orgName').value.trim();
         const phoneNumber = document.getElementById('phoneNumber').value.trim();
         const address = document.getElementById('addressInput').value.trim();

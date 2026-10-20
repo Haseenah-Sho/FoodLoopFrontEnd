@@ -89,21 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         foot.style.display = 'block';
         document.getElementById('cartVendorNote').innerHTML =
-            `<i class="bi bi-shop"></i> Items from ${cart.vendorName}`;
+            `<i class="bi bi-shop"></i> Items from ${escapeHtml(cart.vendorName)}`
 
         body.innerHTML = cart.items.map(item => {
             const lineTotal = item.isFree ? 0 : (item.price || 0) * item.quantity;
-            const imgUrl = item.imageUrl
-                ? (item.imageUrl.startsWith('/') ? `https://localhost:7208${item.imageUrl}` : item.imageUrl)
-                : null;
+            const imgUrl = resolveImageUrl(item.imageUrl) || null;
 
             return `
                 <div class="cart-drawer-line" data-id="${item.listingId}">
                     ${imgUrl
-                        ? `<img src="${imgUrl}" class="cart-drawer-thumb" alt="${item.foodName}" onerror="this.outerHTML='<div class=\\'cart-drawer-thumb-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`
+                        ? `<img src="${escapeHtml(imgUrl)}" class="cart-drawer-thumb" alt="${escapeHtml(item.foodName)}" onerror="this.outerHTML='<div class=\\'cart-drawer-thumb-placeholder\\'><i class=\\'bi bi-image\\'></i></div>'">`
                         : `<div class="cart-drawer-thumb-placeholder"><i class="bi bi-image"></i></div>`}
                     <div class="cart-drawer-info">
-                        <div class="cart-drawer-name">${item.foodName}</div>
+                        <div class="cart-drawer-name">${escapeHtml(item.foodName)}</div>
                         <div class="cart-drawer-price">${item.isFree ? 'Free' : formatCurrency(item.price) + ' each'}</div>
                         <div class="cart-drawer-controls">
                             <div class="cart-drawer-qty">
@@ -235,18 +233,14 @@ document.addEventListener('DOMContentLoaded', () => {
             portions > 0;
 
         // ── Image ──
-        let imageUrl = listing.primaryImageUrl;
-
-        if (imageUrl && imageUrl.startsWith('/')) {
-            imageUrl = `https://localhost:7208${imageUrl}`;
-        }
+        const imageUrl = resolveImageUrl(listing.primaryImageUrl);
 
         const imgHtml = imageUrl
             ? `
                 <img
-                    src="${imageUrl}"
+                    src="${escapeHtml(imageUrl)}"
                     class="listing-card-img"
-                    alt="${listing.foodName}"
+                    alt="${escapeHtml(listing.foodName)}"
                     loading="lazy"
                     onerror="
                         this.style.display='none';
@@ -294,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="listing-card-top">
 
                         <div class="listing-card-name">
-                            ${listing.foodName}
+                            ${escapeHtml(listing.foodName)}
                         </div>
 
                         <span class="${isFree ? 'badge-free' : 'badge-paid'}">
@@ -304,11 +298,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div class="listing-card-vendor">
-                        ${listing.vendorName}
+                        ${escapeHtml(listing.vendorName)}
                     </div>
 
                     <div class="listing-card-address">
-                        <i class="bi bi-geo-alt"></i> ${listing.address}
+                        <i class="bi bi-geo-alt"></i> ${escapeHtml(listing.address)}
                     </div>
 
                     <div class="listing-card-fulfillment">
